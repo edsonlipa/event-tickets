@@ -11,6 +11,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-004 | Como comprador, quiero recibir y reenviar mis entradas QR por correo para poder acceder al evento. | P0 | Bloqueado | Código y E2E hechos; falta validación real Gmail/Outlook/iCloud |
 | US-005 | Como guardia, quiero validar QR y buscar asistentes aun con conectividad degradada para controlar la puerta. | P0 | Bloqueado | Código y E2E hechos; falta aceptación en dos celulares reales y modo avión |
 | US-006 | Como organizador, quiero probar el flujo completo en el local y operar el evento con un runbook. | P0 | Bloqueado | Código, runbook y E2E hechos; falta prueba presencial y capacitación |
+| US-007 | Como operador, quiero elegir Nodemailer/Zoho o Resend sin cambiar el flujo de entradas. | P0 | Bloqueado | Código y E2E Nodemailer hechos; falta credencial y aceptación real Zoho/Resend |
 
 ## Convenciones de estado
 

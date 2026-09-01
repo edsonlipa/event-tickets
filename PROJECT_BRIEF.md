@@ -9,6 +9,7 @@
 > v2.2: precio, dominios y volumen resueltos (§10.1); hoja de contactos (§4.2) y
 >       cola de reintento de correo (§4.3)
 > v2.3: precio a S/15, fecha del evento (dom 6 sep) y calendario con fechas reales
+> v2.4: proveedor de correo modular; Resend se conserva y se agrega Nodemailer/Zoho
 
 ---
 
@@ -33,6 +34,7 @@ Revisión técnica del brief original. Lo que cambió y por qué:
 | 13 | **Capa PWA en la vista guardia; app nativa descartada** (§4.6) | El único beneficio real de React Native sobre el navegador es la linterna en iPhone, y su distribución repite el riesgo de afiliación con un tercero que ya se rechazó en §3 |
 | 14 | **Revisión de pagos en hoja de contactos** (§4.2) | Con 200–300 asistentes a S/15 son ~200–250 comprobantes a revisar a mano, en oleada los últimos días. Confirmar de uno en uno no escala |
 | 15 | **Cola de reintento de correo con cron** (§4.3) | v1 dejaba `email_enviado`/`email_error` como campos sin proceso que los consumiera. El cron cierra el diseño y absorbe cualquier fallo de envío, incluida la cuota diaria |
+| 16 | **Proveedor de correo intercambiable** (§4.3) | Se conserva Resend y se agrega Nodemailer/SMTP para Zoho sin acoplar plantilla, QR ni cola al transporte |
 
 ---
 
@@ -173,7 +175,7 @@ registro ya pagado:
   **no usadas**, empezando por las que no tienen `nombre_persona`. Nunca se borran
   filas — la anulación queda auditable y el QR deja de admitir en la puerta.
 
-### 4.3 Envío de entradas por correo (Resend)
+### 4.3 Envío de entradas por correo (proveedor intercambiable)
 
 - Un correo por compra, con una tarjeta por entrada (nombre de la persona si
   se especificó) y su QR embebido.
@@ -183,10 +185,12 @@ registro ya pagado:
 - El QR codifica una **URL** (`https://<dominio>/v/<uuid>`), no el UUID pelado:
   si alguien lo escanea con la cámara nativa del celular llega a una página útil,
   y el escáner del guardia puede validar el prefijo antes de consultar.
-- Requiere dominio verificado en Resend (SPF/DKIM) para evitar spam.
+- El proveedor se selecciona por configuración: **Resend API** o
+  **Nodemailer/SMTP** (Mailpit local y Zoho en producción). Requiere SPF/DKIM
+  correctos para el proveedor activo.
 
-**Dominio de envío: `illapasystems.com` — ya verificado en Resend.** Comprobado por
-DNS el 31/08/2026:
+**Dominio de envío: `illapasystems.com`.** Resend continúa disponible y fue
+verificado por DNS el 31/08/2026:
 
 ```
 resend._domainkey.illapasystems.com   TXT  p=MIGfMA0GCSqGSIb3DQEB...   DKIM
@@ -215,10 +219,10 @@ negro justo cuando más importan. Además, el correo de contacto va **visible en
 cuerpo** del mensaje, no solo en la cabecera: mucha gente no usa "Responder", busca
 una dirección para escribir o reenviar.
 
-**Cuota diaria y cola de reintento.** Se usa el **plan gratuito de Resend** (tope de
-100 correos/día). El total necesario para el evento es ~250–350 correos en 7 días,
-contra ~700 de capacidad: **el total sobra, solo hay riesgo de ráfaga** si el
-organizador acumula confirmaciones para el final.
+**Cuota y cola de reintento.** Resend gratuito conserva su tope configurado de
+100 correos/día. Zoho aplica su propia política SMTP; el límite operativo se
+configura sin cambiar la cola. El total necesario es ~250–350 correos en 7 días:
+el riesgo principal son las ráfagas si el organizador acumula confirmaciones.
 
 Se cubre completando el diseño que ya está en el modelo de datos:
 
@@ -587,7 +591,8 @@ Fijarlo en un único helper de formato, no ad-hoc por componente.
 ## 8. Stack
 
 - **Next.js** (App Router) + **Supabase** (Postgres + Auth + Storage privado)
-- **Resend** para envío de correo (inline attachments CID para los QR)
+- **Proveedor modular de correo:** Nodemailer/SMTP (Mailpit o Zoho) y Resend,
+  seleccionable por configuración; inline attachments CID para los QR
 - `qrcode` (npm) para generación de QR en backend
 - Escáner: **`BarcodeDetector` nativo con fallback a `@zxing/browser`**
   (se descarta `html5-qrcode`, sin mantenimiento activo)
@@ -622,7 +627,7 @@ Fijarlo en un único helper de formato, no ad-hoc por componente.
 | **Dominio de envío** | **`illapasystems.com`**, ya verificado en Resend | El DNS de correo, lo más lento del camino crítico, ya está hecho (§4.3) |
 | **Dominio web** | **`entradas.illapasystems.com`** | CNAME a Vercel. Alineado con el remitente. `illapa.pe` descartado: zona vacía |
 | **Remitente** | `no-reply@illapasystems.com` + `Reply-To` al cliente | Contacto también visible en el cuerpo (§4.3) |
-| **Plan de correo** | **Resend gratuito** (100/día) | ~700 de capacidad semanal contra ~350 necesarios. Cubierto con cola de reintento (§4.3) |
+| **Proveedor de correo** | **Resend o Nodemailer/Zoho**, seleccionable | Resend se conserva como alternativa; ambos usan la misma cola y QR CID (§4.3) |
 | **Asistentes estimados** | **200–300** | ~200–250 comprobantes a revisar: motiva la hoja de contactos (§4.2). Recaudación estimada S/3.000–4.500 |
 
 ### 10.2 Pendientes

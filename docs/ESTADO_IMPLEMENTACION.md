@@ -11,7 +11,7 @@
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. |
-| Correo | US-004 implementada y validada en Mailpit con QR CID; Resend y entrega real pendientes de credenciales/despliegue. |
+| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. Zoho/Resend y entrega real pendientes. |
 | Compra pública | US-002 hecha: compra de 3 entradas con nombres, compresión a 1600 px, Storage privado, aforo y rate limit atómicos; 4 pruebas E2E releen base y archivo. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
@@ -20,16 +20,18 @@
 
 ## Siguiente paso
 
-Ejecutar `docs/RUNBOOK_EVENTO.md` en el local con organizador, guardias y
-dispositivos reales; registrar métricas, incidencias y aprobación.
+Configurar una contraseña de aplicación de Zoho en el entorno desplegado, probar
+el alias `no-reply` y ejecutar la matriz Gmail/Outlook/iCloud. Luego ejecutar
+`docs/RUNBOOK_EVENTO.md` en el local con los dispositivos reales.
 
 ## Bloqueos externos
 
 - QR y número Yape del organizador para abrir la venta.
 - Hora, nombre, lugar y texto final del evento.
-- Correo del cliente para `RESEND_REPLY_TO`.
-- Credencial de Resend y despliegue para probar entrega real en Gmail, Outlook e
-  iCloud; hasta entonces US-004 no cumple por completo su criterio del PRD.
+- Confirmar `EMAIL_REPLY_TO` definitivo.
+- Contraseña de aplicación/host Zoho o credencial Resend y despliegue para probar
+  entrega real en Gmail, Outlook e iCloud; hasta entonces US-004 y US-007 no
+  cumplen por completo sus criterios.
 - Dos celulares reales y el dispositivo definitivo de los guardias para probar
   cámara, linterna, instalación, escaneo simultáneo y modo avión; hasta entonces
   US-005 no cumple por completo su criterio del PRD.

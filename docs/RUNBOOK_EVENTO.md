@@ -53,7 +53,7 @@ posición y conectividad que habrá durante el evento.
 - [ ] Abrir el escáner en cada celular con red para renovar la precarga.
 - [ ] Cargar celulares y power banks al 100%; preparar cables y linternas de clip.
 - [ ] Entregar el PIN a los guardias por un canal acordado, no por este documento.
-- [ ] Verificar accesos de emergencia a Vercel, Supabase y Resend.
+- [ ] Verificar accesos de emergencia a Vercel, Supabase y al proveedor de correo activo.
 
 ## Apertura de puertas
 

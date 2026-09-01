@@ -12,8 +12,9 @@ administrativo y autoservicio, y publicar la landing de lectura nativa del QR.
   `${NEXT_PUBLIC_SITE_URL}/v/${entrada.id}`; nunca el UUID aislado.
 - El correo contiene una tarjeta por entrada y adjunta cada PNG con un CID único.
   El HTML referencia `cid:<id>` y no usa `data:` URI.
-- Desarrollo usa SMTP hacia Mailpit de Supabase. Producción usa la API de Resend.
-  Ambos transportes comparten asunto, HTML, remitente, `Reply-To` y adjuntos.
+- El transporte implementa `EmailSendingProvider`: Nodemailer usa SMTP hacia
+  Mailpit/Zoho y Resend usa su API. Ambos comparten asunto, HTML, remitente,
+  `Reply-To` y adjuntos.
 - El correo de contacto se muestra también en el cuerpo.
 
 ## Cola e idempotencia
@@ -25,7 +26,7 @@ administrativo y autoservicio, y publicar la landing de lectura nativa del QR.
 - En éxito se fijan `email_enviado`, `email_enviado_at` y se limpia el error. En
   fallo se conserva `email_enviado = false`, se guarda `email_error` y se libera
   el claim para un reintento posterior.
-- El cron respeta `RESEND_LIMITE_DIARIO`, procesa únicamente pagos pendientes de
+- El cron respeta `EMAIL_SEND_LIMIT`, procesa únicamente pagos pendientes de
   correo y exige `Authorization: Bearer <CRON_SECRET>`.
 
 ## Reenvíos

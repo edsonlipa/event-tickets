@@ -25,7 +25,7 @@ el runbook, no el desarrollo.
 | Auth admin | Supabase Auth | §6 |
 | Auth guardia | PIN → cookie de sesión firmada | §6.3 |
 | Archivos | Supabase Storage, bucket **privado** | §6.2 |
-| Correo | Resend, QR embebidos por CID | §4.3 |
+| Correo | `EmailSendingProvider`: Nodemailer/SMTP o Resend; QR CID | §4.3 |
 | QR (generación) | `qrcode` en backend | §8 |
 | QR (lectura) | `BarcodeDetector` → fallback `@zxing/browser` | §7.5 |
 | App guardia | PWA, **no** nativa | §4.6 |
@@ -88,7 +88,8 @@ entradas-evento/
 │   │   ├── auth-puerta.ts                  # firma/verificación de cookie del PIN
 │   │   ├── rate-limit.ts                   # contra Postgres
 │   │   ├── qr.ts                           # generación PNG
-│   │   ├── mail.ts                         # Resend + armado CID
+│   │   ├── mail.ts                         # composición + cola
+│   │   ├── email/                          # providers Nodemailer y Resend
 │   │   ├── storage.ts                      # signed URLs
 │   │   └── fecha.ts                        # formato America/Lima
 │   └── components/
@@ -162,11 +163,21 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=          # server-only, nunca NEXT_PUBLIC_
 
+# Correo
+EMAIL_SENDING_PROVIDER=              # nodemailer | resend
+EMAIL_FROM="Entradas <no-reply@illapasystems.com>"
+EMAIL_REPLY_TO=admin@illapasystems.com
+EMAIL_SEND_LIMIT=100
+
+# Nodemailer SMTP (Mailpit local o Zoho en producción)
+SMTP_HOST=
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=
+SMTP_PASS=
+
 # Resend
 RESEND_API_KEY=
-RESEND_FROM="Entradas <no-reply@illapasystems.com>"
-RESEND_REPLY_TO=                    # correo del cliente — también visible en el cuerpo
-RESEND_LIMITE_DIARIO=100            # plan gratuito; la cola respeta este tope
 CRON_SECRET=                        # protege /api/cron/correos-pendientes
 
 # Guardia

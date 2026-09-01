@@ -16,7 +16,8 @@ function autorizado(request: Request) {
 export async function GET(request: Request) {
   if (!autorizado(request)) return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   const db = getDb();
-  const limite = Math.max(1, Number(process.env.RESEND_LIMITE_DIARIO || 100));
+  const limiteConfigurado = Number(process.env.EMAIL_SEND_LIMIT || process.env.RESEND_LIMITE_DIARIO || 100);
+  const limite = Number.isInteger(limiteConfigurado) && limiteConfigurado > 0 ? Math.min(limiteConfigurado, 1000) : 100;
   const { count } = await db.from("email_envios").select("id", { count: "exact", head: true }).eq("exito", true).gte("created_at", inicioDiaLimaUtc());
   const disponibles = Math.max(0, limite - (count ?? 0));
   if (disponibles === 0) return NextResponse.json({ procesados: 0, disponibles: 0 });

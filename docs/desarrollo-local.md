@@ -40,8 +40,8 @@ La app debe seleccionar el transporte por entorno:
 
 | Entorno | Transporte | Destino |
 |---|---|---|
-| Desarrollo | SMTP | Buzón local de Supabase, host `127.0.0.1`, puerto `55425` |
-| Producción | API HTTP | Resend |
+| Desarrollo | Nodemailer/SMTP | Buzón local de Supabase, host `127.0.0.1`, puerto `55425` |
+| Producción | Configurable | Nodemailer con Zoho SMTP o API de Resend |
 
 El buzón de Auth se abre en la URL indicada por `npm run supabase:status`
 (en este proyecto, <http://127.0.0.1:55424>). La app usa el puerto SMTP local 55425.
@@ -51,15 +51,37 @@ Nunca usar claves reales de Resend en el entorno local. Los correos de prueba se
 inspeccionan en el buzón local de Supabase y los correos de producción se prueban
 únicamente en el entorno desplegado.
 
-US-004 usa `MAIL_TRANSPORT=smtp` en local. Una confirmación debe aparecer en
+US-004 usa `EMAIL_SENDING_PROVIDER=nodemailer` en local. Una confirmación debe aparecer en
 Mailpit con los QR bajo `Inline`, un `Content-ID` por entrada y el `Reply-To`
 configurado. El cron local requiere `CRON_SECRET`; en Vercel se ejecuta diariamente
 a las 14:00 UTC (09:00 en Lima) según `vercel.json`.
 
-Para producción se requieren `MAIL_TRANSPORT=resend`, `RESEND_API_KEY`,
-`RESEND_FROM`, `RESEND_REPLY_TO`, `RESEND_LIMITE_DIARIO` y `CRON_SECRET`. La
-historia no se considera terminada hasta comprobar recepción y QR visibles en
-Gmail, Outlook e iCloud.
+Las variables comunes de producción son `EMAIL_FROM`, `EMAIL_REPLY_TO`,
+`EMAIL_SEND_LIMIT` y `CRON_SECRET`. Con Resend se selecciona `resend` y se define
+`RESEND_API_KEY`. Con Zoho se selecciona `nodemailer` y se configuran los campos
+SMTP descritos abajo. La historia no se considera terminada hasta comprobar
+recepción y QR visibles en Gmail, Outlook e iCloud.
+
+### Zoho SMTP
+
+No versionar ni compartir la contraseña de aplicación. El host exacto se copia
+del panel de la cuenta Zoho; para una organización paga suele ser
+`smtppro.zoho.com`. Configuración esperada para TLS directo:
+
+```env
+EMAIL_SENDING_PROVIDER=nodemailer
+EMAIL_FROM="Entradas <no-reply@illapasystems.com>"
+EMAIL_REPLY_TO=admin@illapasystems.com
+SMTP_HOST=smtppro.zoho.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=admin@illapasystems.com
+SMTP_PASS=contraseña-de-aplicacion
+```
+
+`no-reply@illapasystems.com` debe figurar en Zoho como alias autorizado del
+usuario autenticado. Para puerto 587 usar `SMTP_SECURE=false`; producción exige
+STARTTLS automáticamente.
 
 ## Datos de compra provisionales
 
