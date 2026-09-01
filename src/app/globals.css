@@ -86,6 +86,11 @@ body {
   display: none;
 }
 
+/* El banner oficial ya contiene el nombre; conservar el h1 para reactivarlo. */
+[data-compra-pasos] header h1 {
+  display: none;
+}
+
 /* Ayuda contextual del botón de pago dividido. */
 .space-y-4 + button[class*="border-dashed"]::after {
   content: "Si el pago es mayor a tu límite diario de Yape, puedes hacer dos pagos.";
