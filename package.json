@@ -1,0 +1,48 @@
+{
+  "name": "entradas-evento",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "supabase": "supabase",
+    "supabase:start": "supabase status || supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:reset": "supabase db reset",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "@zxing/browser": "^0.2.1",
+    "next": "16.3.4",
+    "nodemailer": "^9.1.0",
+    "qrcode": "^1.5.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "^6.25.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "^0.0.79",
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
+    "@types/pngjs": "^6.0.5",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "supabase": "^2.72.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
