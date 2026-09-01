@@ -1,5 +1,8 @@
 # Runbook operativo — evento 6 de septiembre de 2026
 
+La preparación de infraestructura, despliegue y apertura de ventas se ejecuta
+primero desde [RUNBOOK_PRODUCCION.md](./RUNBOOK_PRODUCCION.md).
+
 Este documento se completa con nombres, hora, lugar, responsables y teléfonos
 reales antes de la prueba presencial. No escribir contraseñas, claves de API ni
 el `service_role` aquí.
