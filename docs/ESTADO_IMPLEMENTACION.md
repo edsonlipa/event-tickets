@@ -15,12 +15,13 @@
 | Compra pública | US-002 hecha: compra de 3 entradas con nombres, compresión a 1600 px, Storage privado, aforo y rate limit atómicos; 4 pruebas E2E releen base y archivo. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
+| Operación | US-006 implementada localmente: ajuste pagado transaccional, anulación auditable, export CSV segura y runbook; prueba presencial pendiente. |
 | Despliegue | Pendiente. |
 
 ## Siguiente paso
 
-Preparar US-006 y ejecutar la aceptación presencial de US-005 con los celulares
-reales de los guardias.
+Ejecutar `docs/RUNBOOK_EVENTO.md` en el local con organizador, guardias y
+dispositivos reales; registrar métricas, incidencias y aprobación.
 
 ## Bloqueos externos
 
@@ -32,6 +33,8 @@ reales de los guardias.
 - Dos celulares reales y el dispositivo definitivo de los guardias para probar
   cámara, linterna, instalación, escaneo simultáneo y modo avión; hasta entonces
   US-005 no cumple por completo su criterio del PRD.
+- Local, organizador y guardias para ejecutar la prueba E2E sin ayuda, medir el
+  acceso y completar capacitación; hasta entonces US-006 sigue bloqueada.
 - Aforo máximo (hasta entonces se configura como `null`).
 
 ## Datos locales provisionales

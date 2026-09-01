@@ -62,7 +62,8 @@ entradas-evento/
 │       ├── 0004_completar_compra_publica.sql
 │       ├── 0005_panel_admin.sql
 │       ├── 0006_cola_correo.sql
-│       └── 0007_puerta.sql
+│       ├── 0007_puerta.sql
+│       └── 0008_operacion_evento.sql
 ├── public/
 │   ├── manifest.json
 │   ├── sw.js
@@ -305,9 +306,9 @@ Este día no es "terminar features", es "descubrir lo que no se ve desde el escr
 - [ ] Prueba end-to-end en el local: **misma luz, misma señal, dispositivos reales de los guardias**
 - [ ] Medir tiempo real por persona en la puerta
 - [ ] Verificar que la PWA instala en los celulares que efectivamente se van a usar; mostrarle el gesto al guardia si es iPhone
-- [ ] Repetir la prueba de RLS del día 1
-- [ ] Edición post-confirmación (subir y bajar cantidad, con anulación)
-- [ ] Export CSV
+- [x] Repetir la prueba de RLS del día 1
+- [x] Edición post-confirmación (subir y bajar cantidad, con anulación)
+- [x] Export CSV
 - [ ] Capacitar al organizador en el panel y a los guardias en el escáner
 
 **Hecho cuando:** el organizador confirma un pago y el guardia escanea esa entrada,

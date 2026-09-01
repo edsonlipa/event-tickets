@@ -12,6 +12,7 @@ const casos = {
   loteB: { id: randomUUID(), nombre: `Lote B ${randomUUID().slice(0, 6)}`, cantidad: 3 },
   concurrente: { id: randomUUID(), nombre: `Concurrente ${randomUUID().slice(0, 6)}`, cantidad: 3 },
   rechazo: { id: randomUUID(), nombre: `Rechazo ${randomUUID().slice(0, 6)}`, cantidad: 1 },
+  ajuste: { id: randomUUID(), nombre: "=2+2", cantidad: 2 },
 };
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL9QAAAAABJRU5ErkJggg==", "base64");
 
@@ -90,6 +91,8 @@ test("protege páginas y APIs sin una sesión admin", async ({ page, request }) 
   await expect(page).toHaveURL(/\/admin\/login$/);
   const response = await request.post(`/api/admin/registros/${casos.loteA.id}/confirmar`);
   expect(response.status()).toBe(401);
+  expect((await request.patch(`/api/admin/registros/${casos.ajuste.id}`, { data: { cantidadPersonas: 4 } })).status()).toBe(401);
+  expect((await request.get("/api/admin/export")).status()).toBe(401);
 });
 
 test("muestra 12 comprobantes, busca por operación y confirma un lote", async ({ page }) => {
@@ -138,4 +141,45 @@ test("rechaza con motivo y conserva la auditoría", async ({ page }) => {
   await expect(page.getByText("Este registro ya está rechazado.")).toBeVisible();
   const { data } = await db().from("registros").select("status,motivo_rechazo").eq("id", casos.rechazo.id).single();
   expect(data).toMatchObject({ status: "rechazado", motivo_rechazo: "El monto del comprobante no coincide" });
+});
+
+test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }) => {
+  await login(page);
+  await page.evaluate(async (id) => { await fetch(`/api/admin/registros/${id}/confirmar`, { method: "POST" }); }, casos.ajuste.id);
+  const resultados = await page.evaluate(async (id) => Promise.all([
+    fetch(`/api/admin/registros/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ cantidadPersonas: 4 }) }),
+    fetch(`/api/admin/registros/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ cantidadPersonas: 4 }) }),
+  ]).then((responses) => responses.map((response) => response.status)), casos.ajuste.id);
+  expect(resultados).toEqual([200, 200]);
+
+  const client = db();
+  const { data: entradas } = await client.from("entradas").select("id,nombre_persona,usado,anulada").eq("registro_id", casos.ajuste.id);
+  expect(entradas).toHaveLength(4);
+  const usada = entradas?.find((entrada) => entrada.nombre_persona)?.id;
+  expect(usada).toBeTruthy();
+  await client.from("entradas").update({ usado: true, usado_at: new Date().toISOString(), usado_por: "e2e" }).eq("id", usada!);
+
+  await page.goto(`/admin/registros/${casos.ajuste.id}`);
+  await page.getByLabel("Cantidad de entradas").fill("2");
+  await page.getByRole("button", { name: "Guardar cantidad" }).click();
+  await expect.poll(async () => (await client.from("registros").select("cantidad_personas").eq("id", casos.ajuste.id).single()).data?.cantidad_personas).toBe(2);
+  const { data: entradasAjustadas } = await client.from("entradas").select("id,nombre_persona,usado,anulada,anulada_at,anulada_por").eq("registro_id", casos.ajuste.id);
+  expect(entradasAjustadas).toHaveLength(4);
+  expect(entradasAjustadas?.filter((entrada) => !entrada.anulada)).toHaveLength(2);
+  expect(entradasAjustadas?.filter((entrada) => entrada.anulada)).toHaveLength(2);
+  expect(entradasAjustadas?.find((entrada) => entrada.id === usada)).toMatchObject({ usado: true, anulada: false });
+  expect(entradasAjustadas?.filter((entrada) => entrada.anulada).every((entrada) => entrada.nombre_persona === null && entrada.anulada_por === adminId && entrada.anulada_at)).toBe(true);
+});
+
+test("exporta CSV protegido y neutraliza fórmulas", async ({ page }) => {
+  await login(page);
+  const exportacion = await page.evaluate(async () => {
+    const response = await fetch("/api/admin/export");
+    return { status: response.status, type: response.headers.get("content-type"), disposition: response.headers.get("content-disposition"), body: await response.text() };
+  });
+  expect(exportacion.status).toBe(200);
+  expect(exportacion.type).toContain("text/csv");
+  expect(exportacion.disposition).toContain("registros-evento.csv");
+  expect(exportacion.body).toContain("entradas_anuladas");
+  expect(exportacion.body).toContain("\"'=2+2\"");
 });

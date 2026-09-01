@@ -100,3 +100,13 @@ se sincroniza con el endpoint atómico.
 
 Las pruebas automatizadas simulan concurrencia y falta de red, pero no sustituyen
 la aceptación con dos celulares reales, cámara, linterna e instalación PWA.
+
+## Cierre operativo
+
+El detalle de una compra pagada permite ajustar su cantidad. El aumento genera
+entradas nuevas; la reducción anula entradas no usadas sin borrar auditoría. El
+panel ofrece `Exportar CSV`, protegido por la misma sesión admin.
+
+La preparación y aceptación presencial se ejecutan desde
+`docs/RUNBOOK_EVENTO.md`. Sus campos pendientes deben completarse con datos reales
+antes del evento; no colocar secretos ni contraseñas dentro del documento.
