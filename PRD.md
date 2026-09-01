@@ -39,7 +39,7 @@ el runbook, no el desarrollo.
 | Precio de la entrada | **S/15** |
 | Fecha del evento | **domingo 6 de septiembre de 2026** (hora pendiente) |
 | Asistentes estimados | **200–300** (⇒ ~200–250 registros a verificar; S/3.000–4.500) |
-| Dominio web | **`entradas.illapasystems.com`** → CNAME a Vercel (único registro a crear) |
+| Dominio web | **`openchampionship.illapasystems.com`** → CNAME administrado en Namecheap hacia Vercel |
 | Dominio de envío | **`illapasystems.com`** — **ya verificado en Resend** |
 | Remitente | `no-reply@illapasystems.com` + `Reply-To` al cliente |
 | Plan de correo | **Resend gratuito**, 100/día, con cola de reintento |
@@ -155,7 +155,7 @@ cada uno a un color y un sonido:
 
 ```bash
 # .env.local.example
-NEXT_PUBLIC_SITE_URL=https://entradas.illapasystems.com
+NEXT_PUBLIC_SITE_URL=https://openchampionship.illapasystems.com
 
 # Supabase — la anon key va al navegador SOLO para Auth del admin.
 # Con RLS deny-all no puede leer ninguna tabla (§6.1 del brief).
@@ -230,7 +230,7 @@ hecha.
 
 Lo primero del día es el DNS, porque es lo único cuya duración no controlamos.
 
-- [ ] CNAME de `entradas.illapasystems.com` a Vercel — **el único registro DNS que falta**
+- [ ] CNAME de `openchampionship.illapasystems.com` en Namecheap hacia el destino exacto indicado por Vercel
 - [ ] Confirmar en el panel de Resend que el dominio sigue en *Verified* y enviar un correo de prueba
 - [ ] `git init` + scaffold Next.js + TypeScript
 - [ ] Proyecto Supabase creado; correr `0001_schema.sql` y `0002_rls.sql`

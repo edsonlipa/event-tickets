@@ -11,12 +11,13 @@
 
 | Fase | Estado | Evidencia / responsable |
 |---|---|---|
-| Proyecto Supabase de producción | Pendiente | |
-| Migraciones `0001`–`0013` | Pendiente | Dry-run 0001–0012 correcto; se añadió 0013 porque producción vacía no ejecuta `seed.sql` |
-| RLS y Storage privado | Pendiente | |
-| Usuario administrador | Pendiente | |
+| Proyecto Supabase de producción | Confirmado | Ref `lqzbqozbuvtafegzlhgc`; proyecto creado vacío |
+| Migraciones `0001`–`0013` | Confirmado | Dry-run revisado y `db push` finalizado correctamente |
+| RLS y Storage privado | Confirmado | anon lee cero, insert bloqueado con 42501, bucket privado |
+| Usuario administrador | Confirmado | `arakado@illapa.pe`, rol `admin`; no registrar contraseña aquí |
+| Cuenta Vercel y repositorio GitHub | Confirmado | Confirmado por el operador el 1 de septiembre de 2026 |
 | Proyecto y variables Vercel | Pendiente | |
-| Dominio `entradas.illapasystems.com` | Pendiente | |
+| Dominio `openchampionship.illapasystems.com` | Pendiente | Zona `illapasystems.com` administrada en Namecheap |
 | Correo real y cron | Pendiente | |
 | Compra E2E en producción | Pendiente | |
 | Puerta en dos celulares | Pendiente | |
@@ -34,7 +35,7 @@
 | Yape | 964197335 |
 | Titular | Joyce Alessandra Valdivia Paredes |
 | QR Yape | `public/yape-qr.png` |
-| Sitio | `https://entradas.illapasystems.com` |
+| Sitio | `https://openchampionship.illapasystems.com` |
 
 Antes de continuar, escanear el QR con Yape y confirmar que muestra el número y
 titular indicados. Si no coincide, **no abrir ventas**.
@@ -54,22 +55,24 @@ titular indicados. Si no coincide, **no abrir ventas**.
 
 ### Creación y configuración
 
-- [ ] Crear o identificar el proyecto de producción en la región adecuada.
+- [x] Crear o identificar el proyecto de producción en la región adecuada.
 - [ ] Guardar URL, anon key y `service_role` en el gestor de secretos; nunca en Git.
 - [ ] Desactivar el registro público por email.
-- [ ] Aplicar en orden las migraciones `0001`–`0013` mediante un procedimiento
+- [x] Aplicar en orden las migraciones `0001`–`0013` mediante un procedimiento
       revisado. No ejecutar reset remoto.
-- [ ] Comprobar que existe una sola fila en `evento` y coincide con la sección 1.
-- [ ] Confirmar que el bucket `comprobantes` existe y es privado.
-- [ ] Crear el usuario administrador y asignar
+- [x] Comprobar que existe una sola fila en `evento` y coincide con la sección 1.
+- [x] Confirmar que el bucket `comprobantes` existe y es privado.
+- [x] Crear el usuario administrador y asignar
       `app_metadata.role = "admin"` desde una herramienta administrativa.
 
 ### Prueba de seguridad obligatoria
 
-- [ ] Con la anon key, intentar leer `evento`, `registros`, `comprobantes`,
+- [x] Con la anon key, intentar leer `evento`, `registros`, `comprobantes`,
       `entradas`, `email_envios`, `intentos_pin` y `rate_limit_eventos`.
-- [ ] Confirmar que ninguna tabla devuelve datos.
-- [ ] Confirmar que anon/authenticated no pueden insertar, actualizar ni borrar.
+- [x] Confirmar que ninguna tabla devuelve datos.
+- [x] Confirmar que `anon` no puede insertar (`42501`, policy RLS).
+- [ ] Confirmar que `anon` no puede actualizar/borrar y que `authenticated` no
+      puede leer ni escribir tablas de negocio.
 - [ ] Confirmar que un comprobante no tiene URL pública.
 - [ ] Desde admin, confirmar que la URL firmada del comprobante expira.
 
@@ -81,7 +84,7 @@ Configurar para Production y Preview solo cuando corresponda. No copiar valores
 locales de Mailpit ni secretos en variables `NEXT_PUBLIC_*`.
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://entradas.illapasystems.com
+NEXT_PUBLIC_SITE_URL=https://openchampionship.illapasystems.com
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -116,11 +119,20 @@ SESSION_SECRET=
 - [ ] Cargar las variables de la sección 4.
 - [ ] Desplegar primero en la URL temporal de Vercel.
 - [ ] Abrir `/`, `/admin/login`, `/puerta` y `/reenviar` sin errores 5xx.
-- [ ] Agregar `entradas.illapasystems.com` al proyecto.
-- [ ] Crear/verificar el CNAME requerido en DNS.
+- [ ] Agregar `openchampionship.illapasystems.com` al proyecto Vercel.
+- [ ] Copiar desde Vercel el destino CNAME específico recomendado para el proyecto;
+      no asumir un valor genérico si el panel muestra otro.
+- [ ] En Namecheap → Domain List → Manage → Advanced DNS, comprobar que no
+      exista otro registro con el host `openchampionship`.
+- [ ] En Host Records crear: tipo `CNAME Record`, host `openchampionship`, valor
+      exacto de Vercel y TTL `Automatic`. Namecheap agrega el dominio al host;
+      no escribir `openchampionship.illapasystems.com` en el campo Host.
+- [ ] Volver a Vercel y esperar estado de dominio válido.
 - [ ] Esperar certificado HTTPS válido.
 - [ ] Confirmar que HTTP redirige a HTTPS y que
       `NEXT_PUBLIC_SITE_URL` coincide exactamente con el dominio final.
+- [ ] Ejecutar `dig CNAME openchampionship.illapasystems.com +short` y guardar la
+      evidencia del destino resuelto.
 
 No emitir entradas reales mientras el dominio final no esté activo: los QR se
 construyen con `NEXT_PUBLIC_SITE_URL`.

@@ -206,7 +206,7 @@ monitoreo, sin riesgo de rechazo. **No tocar esta semana.**
 
 **Consecuencia para el cronograma:** la verificación DNS era lo más lento del camino
 crítico y **ya está hecha antes de empezar**. El día 1 solo necesita crear el CNAME
-de `entradas.illapasystems.com` hacia Vercel.
+de `openchampionship.illapasystems.com` hacia Vercel.
 
 `illapa.pe` se descartó: la zona está vacía (sin MX, TXT ni A). Configurarla desde
 cero agregaría trabajo y riesgo sin ganar nada.
@@ -625,7 +625,7 @@ Fijarlo en un único helper de formato, no ad-hoc por componente.
 | **Precio de la entrada** | **S/15** | `evento.precio_unitario = 15.00`. Máximo por compra S/300 (§7.4) |
 | **Fecha del evento** | **domingo 6 de septiembre de 2026** | Hora aún sin definir. Fija el calendario de §11 |
 | **Dominio de envío** | **`illapasystems.com`**, ya verificado en Resend | El DNS de correo, lo más lento del camino crítico, ya está hecho (§4.3) |
-| **Dominio web** | **`entradas.illapasystems.com`** | CNAME a Vercel. Alineado con el remitente. `illapa.pe` descartado: zona vacía |
+| **Dominio web** | **`openchampionship.illapasystems.com`** | CNAME administrado en Namecheap hacia Vercel; confirmado el 1 de septiembre de 2026 |
 | **Remitente** | `no-reply@illapasystems.com` + `Reply-To` al cliente | Contacto también visible en el cuerpo (§4.3) |
 | **Proveedor de correo** | **Resend o Nodemailer/Zoho**, seleccionable | Resend se conserva como alternativa; ambos usan la misma cola y QR CID (§4.3) |
 | **Asistentes estimados** | **200–300** | ~200–250 comprobantes a revisar: motiva la hoja de contactos (§4.2). Recaudación estimada S/3.000–4.500 |
@@ -664,7 +664,7 @@ Fijarlo en un único helper de formato, no ad-hoc por componente.
 
 | Día | Fecha | Entregable |
 |---|---|---|
-| 1 | **Lun 31 ago** | CNAME de `entradas.illapasystems.com` a Vercel + schema en Supabase con RLS `deny all` + scaffold Next.js + deploy vacío a producción. **El DNS de correo ya está hecho (§4.3), así que este día se acorta** |
+| 1 | **Lun 31 ago** | CNAME de `openchampionship.illapasystems.com` a Vercel + schema en Supabase con RLS `deny all` + scaffold Next.js + deploy vacío a producción. **El DNS de correo ya está hecho (§4.3), así que este día se acorta** |
 | 2 | **Mar 1 sep** | Página pública de compra: formulario, aforo, comprobante con compresión en cliente, rate limit. **→ ABRIR VENTA.** Además: *recon de señal en el local* (20 min, un celular, sin app) |
 | 3 | **Mié 2 sep** | Panel admin + hoja de contactos: lista, confirmar, rechazar, buscador, validación de monto, signed URLs. **→ empezar a confirmar pagos** |
 | 4 | **Jue 3 sep** | Generación de QR + correo con CID + `Reply-To` + cola de reintento con cron + reenvío autoservicio. **Probar entrega real en Gmail, Outlook y iCloud, no solo en un cliente** |

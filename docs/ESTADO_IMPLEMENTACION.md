@@ -25,7 +25,7 @@
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
 | Operación | US-006 implementada localmente: ajuste pagado transaccional, anulación auditable, export CSV segura y runbook; prueba presencial pendiente. |
 | Salida a producción | Runbook de producción creado con fases de Supabase, Vercel/DNS, secretos, correo, E2E, puerta, go/no-go y rollback. Ejecución pendiente. |
-| Despliegue | Pendiente. |
+| Despliegue | Supabase de producción creado y migrado; RLS anónima y bucket privado verificados. Cuenta Vercel y repositorio GitHub disponibles. Dominio decidido: `openchampionship.illapasystems.com`, administrado en Namecheap; proyecto Vercel, variables, CNAME y HTTPS pendientes. |
 
 ## Siguiente paso
 
