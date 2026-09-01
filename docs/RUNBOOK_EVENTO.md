@@ -9,8 +9,8 @@ el `service_role` aquí.
 | Dato | Valor |
 |---|---|
 | Hora de apertura de puertas | Pendiente |
-| Hora del evento | Pendiente |
-| Lugar y puerta(s) | Pendiente |
+| Hora del evento | 9:00 a. m. |
+| Lugar y puerta(s) | Palacio del Deporte José Luis Bustamante y Rivero, Arequipa; puertas pendientes |
 | Organizador / teléfono | Pendiente |
 | Responsable técnico / teléfono | Pendiente |
 | Guardia por dispositivo | Pendiente |

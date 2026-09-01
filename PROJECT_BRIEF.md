@@ -632,27 +632,21 @@ Fijarlo en un único helper de formato, no ad-hoc por componente.
 
 ### 10.2 Pendientes
 
-**Bloqueantes:**
-
-- [ ] **Hora del evento.** Define la expiración de la sesión del guardia y cuánto del
-      domingo queda disponible para ajustes. No bloquea el desarrollo; sí el runbook.
+**Bloqueantes:** ninguno relacionado con los datos públicos del evento.
 
 *Los topes de Yape del organizador quedaron fuera de alcance por decisión del cliente
 (31/08). Ver §7.4.*
 
 **Contenido y accesos a pedir al cliente (bloquean días concretos):**
 
-- [ ] **QR y número de Yape del organizador** — sin esto la página de compra del
-      día 2 no se puede terminar.
 - [ ] **Correo del cliente** para el `Reply-To` y para mostrar en el cuerpo (día 4).
-- [ ] **Nombre, fecha, hora y lugar del evento** como texto — va en la página de
-      compra y en el correo de las entradas.
-- [ ] **Logo o imagen del evento**, si lo hay. Si no, se resuelve con tipografía.
+- [x] **Datos del evento y Yape** — nombre, fecha, hora, lugar, QR, número y
+      titular confirmados el 1 de septiembre de 2026.
+- [x] **Logo o imagen del evento** — banner oficial recibido y configurado.
 
 **Importantes (tienen valor por defecto seguro):**
 
-- [ ] **Aforo máximo del local** — si hay tope, `evento.aforo_maximo`; si no, `null`.
-      Se espera del orden de 200–300.
+- [x] **Aforo máximo del local** — confirmado sin tope; `evento.aforo_maximo = null`.
 - [ ] **Dispositivo de los guardias.** Si el cliente necesita el botón de linterna,
       **tienen que ser Android**: en iPhone no es implementable ni en web ni en PWA,
       y la app nativa quedó descartada (§4.6). Alternativa sin código: linterna de

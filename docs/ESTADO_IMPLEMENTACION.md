@@ -7,7 +7,7 @@
 
 | Área | Estado |
 |---|---|
-| Alcance y PRD | Definidos: entrada S/15; evento 6 de septiembre de 2026. |
+| Alcance y PRD | Definidos: II OPEN CHAMPIONSHIP, entrada S/15, 6 de septiembre de 2026 a las 9:00 a. m., Palacio del Deporte José Luis Bustamante y Rivero, Arequipa, sin aforo máximo. |
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. |
@@ -55,8 +55,6 @@ para ese flujo; Playwright debe ejecutarse solo con su SMTP forzado a Mailpit.
 
 ## Bloqueos externos
 
-- Confirmar que el número y titular Yape configurados corresponden al QR recibido.
-- Hora, nombre, lugar y texto final del evento.
 - Confirmar `EMAIL_REPLY_TO` definitivo.
 - Contraseña de aplicación/host Zoho o credencial Resend y despliegue para probar
   entrega real en Gmail, Outlook e iCloud; hasta entonces US-004 y US-007 no
@@ -66,13 +64,11 @@ para ese flujo; Playwright debe ejecutarse solo con su SMTP forzado a Mailpit.
   US-005 no cumple por completo su criterio del PRD.
 - Local, organizador y guardias para ejecutar la prueba E2E sin ayuda, medir el
   acceso y completar capacitación; hasta entonces US-006 sigue bloqueada.
-- Aforo máximo (hasta entonces se configura como `null`).
 
 ## Datos locales provisionales
 
-El seed local carga **OpenChampionship UNA**, entrada S/15, domingo 6 de
-septiembre de 2026 a las 18:00 (hora provisional), Yape `943771077` y titular
-temporal `OpenChampionship UNA`. No son datos de producción: se reemplazan al
-confirmar la información del organizador. El QR recibido se recortó sin
-reescalado ni regeneración y se sirve desde `/yape-qr.png`; todavía debe
-confirmarse que el número y titular configurados corresponden a esa cuenta.
+El seed local carga **II OPEN CHAMPIONSHIP**, entrada S/15, domingo 6 de
+septiembre de 2026 a las 9:00 a. m., sin aforo máximo, en el Palacio del Deporte
+José Luis Bustamante y Rivero, Arequipa. Yape está configurado con `964197335`,
+titular `Joyce Alessandra Valdivia Paredes` y el QR recibido en
+`/yape-qr.png`, recortado sin reescalado ni regeneración.

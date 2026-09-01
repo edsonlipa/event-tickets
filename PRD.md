@@ -390,6 +390,6 @@ Este plan asume que se resuelven antes o durante el día 1. Ver §10 del brief.
 | **Hora del evento** | Runbook y sesión del guardia | La cookie se fija con expiración amplia y se ajusta después |
 | **Correo del cliente** (`Reply-To`) | Día 4 | Se envía sin `Reply-To` y se agrega después; no bloquea |
 | **Nombre, fecha, hora y lugar como texto** | Días 2 y 4 | Copy de la página de compra y del correo |
-| Aforo máximo | Día 2 | Se deja `null` (sin tope) y se agrega después |
+| Aforo máximo | Confirmado | `null`: el evento no tendrá tope configurado en el sistema |
 | Dispositivo de los guardias | Día 5 | Se construye cross-browser igual; solo afecta la linterna |
 | Número de puertas | Día 6 | Se prepara para 2 y se ajusta |
