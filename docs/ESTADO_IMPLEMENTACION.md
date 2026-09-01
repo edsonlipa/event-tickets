@@ -10,7 +10,7 @@
 | Alcance y PRD | Definidos: II OPEN CHAMPIONSHIP, entrada S/15, 6 de septiembre de 2026 a las 9:00 a. m., Palacio del Deporte José Luis Bustamante y Rivero, Arequipa, sin aforo máximo. |
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
-| Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. |
+| Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. La migración 0013 inserta el evento oficial en proyectos hospedados vacíos, donde `db push` no ejecuta el seed. |
 | Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. Zoho/Resend y entrega real pendientes. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
 | Código duplicado | US-011 implementada: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. E2E pendiente. |

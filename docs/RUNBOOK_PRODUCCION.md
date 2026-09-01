@@ -12,7 +12,7 @@
 | Fase | Estado | Evidencia / responsable |
 |---|---|---|
 | Proyecto Supabase de producción | Pendiente | |
-| Migraciones `0001`–`0012` | Pendiente | |
+| Migraciones `0001`–`0013` | Pendiente | Dry-run 0001–0012 correcto; se añadió 0013 porque producción vacía no ejecuta `seed.sql` |
 | RLS y Storage privado | Pendiente | |
 | Usuario administrador | Pendiente | |
 | Proyecto y variables Vercel | Pendiente | |
@@ -57,7 +57,7 @@ titular indicados. Si no coincide, **no abrir ventas**.
 - [ ] Crear o identificar el proyecto de producción en la región adecuada.
 - [ ] Guardar URL, anon key y `service_role` en el gestor de secretos; nunca en Git.
 - [ ] Desactivar el registro público por email.
-- [ ] Aplicar en orden las migraciones `0001`–`0012` mediante un procedimiento
+- [ ] Aplicar en orden las migraciones `0001`–`0013` mediante un procedimiento
       revisado. No ejecutar reset remoto.
 - [ ] Comprobar que existe una sola fila en `evento` y coincide con la sección 1.
 - [ ] Confirmar que el bucket `comprobantes` existe y es privado.
@@ -212,4 +212,3 @@ Si aparece un defecto crítico después del despliegue:
 | Aprobó organizador | Pendiente |
 | Aprobó responsable técnico | Pendiente |
 | Incidentes conocidos | Pendiente |
-
