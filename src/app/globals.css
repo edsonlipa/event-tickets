@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f3efe4;
+  --foreground: #202020;
+  --cream: #f3efe4;
+  --ink: #202020;
+  --event-red: #d44735;
+  --event-blue: #253a65;
+  --event-yellow: #efc845;
 }
 
 @theme inline {
@@ -10,17 +15,154 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-event-red: var(--event-red);
+  --color-event-blue: var(--event-blue);
+  --color-event-yellow: var(--event-yellow);
+  --shadow-brutal: 8px 8px 0 0 var(--ink);
+  --shadow-brutal-sm: 4px 4px 0 0 var(--ink);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bloque Yape: el QR usa todo su cuadro y copiar queda junto al número. */
+.event-kicker + h2 + .mb-5.grid {
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  align-items: center;
+  border: 0;
+  padding: 0;
+}
+
+.event-kicker + h2 + .mb-5.grid > div:first-child {
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgb(28 28 28 / 10%);
+}
+
+.event-kicker + h2 + .mb-5.grid strong:has(+ button) {
+  display: inline;
+  vertical-align: middle;
+}
+
+.event-kicker + h2 + .mb-5.grid strong + button {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 0.35rem;
+  place-items: center;
+  vertical-align: middle;
+  border: 1px solid rgb(37 58 101 / 25%);
+  border-radius: 0.25rem;
+  font-size: 0;
+  text-decoration: none;
+}
+
+.event-kicker + h2 + .mb-5.grid strong + button::before {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (max-width: 360px) {
+  .event-kicker + h2 + .mb-5.grid {
+    grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  }
+}
+
+[data-compra-pasos] .event-button-outline {
+  display: none;
+}
+
+/* Ayuda contextual del botón de pago dividido. */
+.space-y-4 + button[class*="border-dashed"]::after {
+  content: "Si el pago es mayor a tu límite diario de Yape, puedes hacer dos pagos.";
+  display: block;
+  margin-top: 0.25rem;
+  padding-inline: 0.5rem;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+::selection {
+  background: var(--event-yellow);
+  color: var(--ink);
+}
+
+@layer components {
+  .event-shell {
+    @apply min-h-screen bg-cream px-4 py-8 text-ink sm:px-6 sm:py-12;
+    background-image: radial-gradient(circle at 94% 8%, var(--event-red) 0 44px, transparent 45px), linear-gradient(135deg, transparent 0 78%, color-mix(in srgb, var(--event-yellow) 20%, transparent) 78% 82%, transparent 82%);
+  }
+
+  .event-kicker {
+    @apply text-xs font-black tracking-[0.18em] text-event-red uppercase;
+  }
+
+  .event-title {
+    @apply [overflow-wrap:anywhere] text-3xl font-black leading-none tracking-[-0.035em] uppercase sm:text-4xl;
+  }
+
+  .event-panel {
+    @apply bg-white p-6 shadow-[0_0_0_1px_rgba(28,28,28,.12)] sm:p-7;
+  }
+
+  .event-panel-dark {
+    @apply bg-ink p-6 text-cream shadow-brutal-sm sm:p-7;
+  }
+
+  .event-label {
+    @apply mb-1 block text-xs font-bold tracking-[0.12em] text-neutral-500 uppercase;
+  }
+
+  .event-input {
+    @apply w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base font-semibold outline-none transition-colors placeholder:text-neutral-400 focus:border-event-red;
+  }
+
+  .event-button {
+    @apply inline-flex min-h-11 items-center justify-center bg-event-red px-5 py-3 text-center font-black tracking-wide text-white uppercase transition hover:brightness-95 active:scale-[.98] disabled:opacity-50;
+  }
+
+  .event-button-dark {
+    @apply inline-flex min-h-11 items-center justify-center bg-ink px-5 py-3 text-center font-black tracking-wide text-cream uppercase transition hover:bg-event-blue active:scale-[.98] disabled:opacity-50;
+  }
+
+  .event-button-outline {
+    @apply inline-flex min-h-11 items-center justify-center border-2 border-ink px-5 py-2 text-center font-black tracking-wide text-ink uppercase transition hover:bg-event-yellow active:scale-[.98] disabled:opacity-50;
+  }
+
+  .event-note {
+    @apply border-l-4 border-event-yellow bg-ink px-4 py-3 text-sm text-cream;
+  }
+
+  .ticket-input {
+    @apply w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base font-semibold outline-none transition-colors placeholder:text-neutral-400 focus:border-event-red;
+  }
+
+  .ticket-input[readonly] {
+    @apply cursor-not-allowed bg-cream px-2 text-neutral-600;
+  }
+
+  .ticket-input-dark {
+    @apply w-full border-0 border-b border-cream/30 bg-transparent px-0 py-2 text-sm font-semibold text-cream outline-none transition-colors placeholder:text-cream/35 focus:border-event-yellow;
+  }
+
+  .ticket-label-light {
+    @apply mb-1 block text-[0.65rem] font-bold tracking-[0.12em] text-cream/60 uppercase;
+  }
 }

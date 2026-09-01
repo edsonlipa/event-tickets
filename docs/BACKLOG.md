@@ -12,6 +12,11 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-005 | Como guardia, quiero validar QR y buscar asistentes aun con conectividad degradada para controlar la puerta. | P0 | Bloqueado | Código y E2E hechos; falta aceptación en dos celulares reales y modo avión |
 | US-006 | Como organizador, quiero probar el flujo completo en el local y operar el evento con un runbook. | P0 | Bloqueado | Código, runbook y E2E hechos; falta prueba presencial y capacitación |
 | US-007 | Como operador, quiero elegir Nodemailer/Zoho o Resend sin cambiar el flujo de entradas. | P0 | Bloqueado | Código y E2E Nodemailer hechos; falta credencial y aceptación real Zoho/Resend |
+| US-008 | Como comprador, quiero una interfaz clara y atractiva que conserve toda la seguridad y los datos dinámicos del sistema. | P1 | Hecho | UI móvil revisada; E2E de compra, typecheck, lint y build aprobados |
+| US-009 | Como usuario, quiero una experiencia visual coherente en compra, admin y puerta para reconocer y operar el sistema con claridad. | P1 | Hecho | SDD; revisión visual móvil; typecheck, lint y build aprobados |
+| US-010 | Como comprador, quiero recibir un acuse con el detalle de mi compra para saber que fue registrada y que la confirmación llegará después. | P0 | Hecho | E2E real confirmado por el operador: ambos correos llegan correctamente |
+| US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Bloqueado | Código y test añadidos; falta ejecutar E2E aislado o real |
+| US-012 | Como comprador, quiero registrar mis datos y pagar en pasos claros para revisar el monto antes de enviar mis comprobantes. | P0 | Bloqueado | Código, migración, typecheck, lint y build aprobados; E2E pendiente porque el servidor dev del operador ocupa el lock de Next.js |
 
 ## Convenciones de estado
 

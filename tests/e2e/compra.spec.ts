@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 
 const IMAGEN_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL9QAAAAABJRU5ErkJggg==",
@@ -35,11 +35,14 @@ function dimensionesJpeg(bytes: Uint8Array) {
 }
 
 function compraMultipart(cantidadPersonas: number) {
+  const monto = cantidadPersonas * 15;
   return {
     nombrePagador: "Comprador concurrente",
     celular: "999999999",
     email: `${randomUUID()}@example.test`,
     cantidadPersonas: String(cantidadPersonas),
+    codigosOperacion: String(randomInt(10_000_000, 100_000_000)),
+    montosComprobantes: monto.toFixed(2),
     comprobantes: { name: "comprobante.png", mimeType: "image/png", buffer: IMAGEN_PNG },
   };
 }
@@ -51,17 +54,23 @@ test.beforeAll(async () => {
 });
 
 test("registra tres entradas, sus nombres y un comprobante comprimido", async ({ page }) => {
+  const codigoOperacion = String(randomInt(10_000_000, 100_000_000));
   await page.setExtraHTTPHeaders({ "x-forwarded-for": `e2e-${randomUUID()}` });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "OpenChampionship UNA" })).toBeVisible();
-  await expect(page.getByText("QR pendiente. Usa el número de Yape mostrado.")).toBeVisible();
-  await page.getByLabel("Nombre").fill("Comprador de prueba");
+  await expect(page.getByRole("img", { name: /QR de Yape/i })).toBeVisible();
+  await page.getByLabel("Nombre del comprador").fill("Comprador de prueba");
   await page.getByLabel("Celular").fill("999999999");
   await page.getByLabel("Correo").fill(`${randomUUID()}@example.test`);
-  await page.getByLabel("Entradas").selectOption("3");
+  await page.getByRole("button", { name: "Aumentar entradas" }).click();
+  await page.getByRole("button", { name: "Aumentar entradas" }).click();
   await page.getByLabel("Nombre para entrada 1").fill("Ana");
   await page.getByLabel("Nombre para entrada 2").fill("Bruno");
   await page.getByLabel("Nombre para entrada 3").fill("Carla");
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  await expect(page.getByText("Paso 2 de 2 — Pago")).toBeVisible();
+  await page.getByLabel("Código de operación").fill(codigoOperacion);
+  await page.getByLabel("Monto pagado").fill("45.00");
 
   const dataUrl = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -81,7 +90,7 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
 
   const [response] = await Promise.all([
     page.waitForResponse("**/api/registros"),
-    page.getByRole("button", { name: /Registrar compra/ }).click(),
+    page.getByRole("button", { name: "Registrar compra" }).click(),
   ]);
   const body = (await response.json()) as { id: string };
   expect(response.status()).toBe(201);
@@ -90,7 +99,7 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
   const client = db();
   const { data: registro, error: registroError } = await client
     .from("registros")
-    .select("status, cantidad_personas, nombres_personas")
+    .select("status, cantidad_personas, nombres_personas, email_registro_enviado, email_registro_error")
     .eq("id", body.id)
     .single();
   expect(registroError).toBeNull();
@@ -98,13 +107,24 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
     status: "pendiente",
     cantidad_personas: 3,
     nombres_personas: ["Ana", "Bruno", "Carla"],
+    email_registro_enviado: true,
+    email_registro_error: null,
   });
+
+  const { data: envio } = await client
+    .from("email_envios")
+    .select("tipo,exito")
+    .eq("registro_id", body.id)
+    .eq("tipo", "registro_recibido")
+    .single();
+  expect(envio).toMatchObject({ tipo: "registro_recibido", exito: true });
 
   const { data: comprobante } = await client
     .from("comprobantes")
-    .select("storage_path")
+    .select("storage_path,codigo_operacion,monto")
     .eq("registro_id", body.id)
     .single();
+  expect(comprobante).toMatchObject({ codigo_operacion: codigoOperacion, monto: 45 });
   const { data: archivo, error: descargaError } = await client.storage
     .from("comprobantes")
     .download(comprobante!.storage_path);
@@ -122,6 +142,63 @@ test("rechaza archivos que no son imágenes antes de Storage", async ({ request 
   });
   expect(response.status()).toBe(400);
   await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining("imagen") });
+});
+
+test("restaura el borrador sin conservar imágenes", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Nombre del comprador").fill("Compra en borrador");
+  await page.getByLabel("Celular").fill("999999999");
+  await page.getByLabel("Correo").fill("borrador@example.test");
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  await page.getByLabel("Código de operación").fill("12345678");
+  await page.reload();
+  await expect(page.getByText("Paso 2 de 2 — Pago")).toBeVisible();
+  await expect(page.getByText(/vuelve a seleccionar cada comprobante/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Cancelar" })).toHaveCount(0);
+});
+
+test("el monto es automático con un pago y editable al dividirlo", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Nombre del comprador").fill("Compra dividida");
+  await page.getByLabel("Celular").fill("999999999");
+  await page.getByLabel("Correo").fill("dividida@example.test");
+  await page.getByRole("button", { name: "Aumentar entradas" }).click();
+  await expect(page.getByLabel("Nombre para entrada 1")).toHaveValue("Compra dividida");
+  await page.getByRole("button", { name: "Reducir entradas" }).click();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  await expect(page.getByLabel("Monto pagado")).toHaveValue("15.00");
+  await expect(page.getByLabel("Monto pagado")).toHaveAttribute("readonly", "");
+  await page.getByRole("button", { name: /Agregar otro pago/i }).click();
+  await expect(page.getByLabel("Monto pagado")).not.toHaveAttribute("readonly", "");
+  await expect(page.getByLabel("Monto pagado 2")).not.toHaveAttribute("readonly", "");
+});
+
+test("rechaza en servidor una suma distinta al total", async ({ request }) => {
+  const response = await request.post("/api/registros", {
+    headers: { "x-forwarded-for": `e2e-${randomUUID()}` },
+    multipart: { ...compraMultipart(1), montosComprobantes: "14.99" },
+  });
+  expect(response.status()).toBe(400);
+  await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining("coincidir exactamente") });
+});
+
+test("explica cuando el código de operación ya fue enviado", async ({ request }) => {
+  const codigo = String(randomInt(10_000_000, 100_000_000));
+  const primera = await request.post("/api/registros", {
+    headers: { "x-forwarded-for": `e2e-${randomUUID()}` },
+    multipart: { ...compraMultipart(1), codigosOperacion: codigo, montosComprobantes: "15" },
+  });
+  expect(primera.status()).toBe(201);
+
+  const segunda = await request.post("/api/registros", {
+    headers: { "x-forwarded-for": `e2e-${randomUUID()}` },
+    multipart: { ...compraMultipart(1), codigosOperacion: codigo, montosComprobantes: "15" },
+  });
+  expect(segunda.status()).toBe(409);
+  await expect(segunda.json()).resolves.toEqual({ error: "El código de operación ya fue enviado.", codigoOperacion: codigo });
+
+  const { count } = await db().from("comprobantes").select("id", { count: "exact", head: true }).eq("codigo_operacion", codigo);
+  expect(count).toBe(1);
 });
 
 test("serializa compras concurrentes para no superar el aforo", async ({ request }) => {

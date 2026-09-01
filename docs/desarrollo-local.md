@@ -85,9 +85,9 @@ STARTTLS automáticamente.
 
 ## Datos de compra provisionales
 
-`supabase/seed.sql` carga datos ficticios para probar US-002. El QR real de Yape
-se configura como un asset local mediante `evento.yape_qr_url` cuando el
-organizador lo entregue; nunca generar ni sustituir ese QR con uno de prueba.
+`supabase/seed.sql` carga datos ficticios para probar US-002. El QR recibido está
+en `public/yape-qr.png` y la migración 0011 configura `evento.yape_qr_url`. El
+asset es un recorte directo, sin reescalado ni regeneración del patrón.
 
 ## Usuario administrador
 
@@ -122,6 +122,12 @@ se sincroniza con el endpoint atómico.
 
 Las pruebas automatizadas simulan concurrencia y falta de red, pero no sustituyen
 la aceptación con dos celulares reales, cámara, linterna e instalación PWA.
+
+Para abrir el servidor de desarrollo desde un teléfono en la red local, la IP del
+equipo debe figurar en `allowedDevOrigins` de `next.config.ts` y se debe reiniciar
+`next dev` después de modificarla. La sesión PIN puede probarse por HTTP, pero la
+cámara requiere un contexto seguro: usar el despliegue HTTPS para la aceptación
+móvil. `http://<ip-lan>:3000` no habilita `getUserMedia` en iPhone ni Chrome.
 
 ## Cierre operativo
 

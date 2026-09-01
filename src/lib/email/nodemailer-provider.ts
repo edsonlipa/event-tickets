@@ -20,6 +20,7 @@ function crearTransporter() {
   if (!host) throw new Error("Falta SMTP_HOST.");
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("SMTP_PORT no es válido.");
   const secure = booleano("SMTP_SECURE", port === 465);
+  const esLoopback = host === "127.0.0.1" || host === "localhost" || host === "::1";
   const user = process.env.SMTP_USER?.trim();
   const pass = process.env.SMTP_PASS;
   if (process.env.NODE_ENV === "production" && (!user || !pass)) throw new Error("Faltan credenciales SMTP.");
@@ -28,7 +29,7 @@ function crearTransporter() {
     host,
     port,
     secure,
-    requireTLS: process.env.NODE_ENV === "production" && !secure,
+    requireTLS: process.env.NODE_ENV === "production" && !secure && !esLoopback,
     auth: user && pass ? { user, pass } : undefined,
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,

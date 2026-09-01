@@ -12,5 +12,5 @@ export function FormularioReenvio() {
     const body = (await response.json()) as { mensaje: string };
     setMensaje(body.mensaje); setEnviando(false);
   }
-  return <form onSubmit={enviar} className="mt-6 space-y-4"><label className="block">Correo de la compra<input name="email" type="email" required maxLength={254} className="mt-1 w-full rounded border p-3" /></label><button disabled={enviando} className="w-full rounded bg-violet-700 p-3 font-semibold text-white disabled:opacity-50">{enviando ? "Procesando…" : "Reenviar entradas"}</button>{mensaje && <p className="rounded bg-violet-50 p-4 text-violet-900">{mensaje}</p>}</form>;
+  return <form onSubmit={enviar} className="mt-7 space-y-5"><label className="block"><span className="event-label">Correo de la compra</span><input name="email" type="email" required maxLength={254} autoComplete="email" className="event-input" /></label><button disabled={enviando} className="event-button w-full">{enviando ? "Procesando…" : "Reenviar entradas"}</button>{mensaje && <p className="event-note">{mensaje}</p>}</form>;
 }

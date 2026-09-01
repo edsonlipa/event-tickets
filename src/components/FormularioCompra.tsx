@@ -1,152 +1,137 @@
+/* eslint-disable @next/next/no-img-element -- las vistas previas usan URLs blob locales */
 "use client";
 
+import NextImage from "next/image";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
-const MAX_LADO_IMAGEN = 1600;
-const CALIDAD_JPEG = 0.82;
+const BORRADOR_KEY = "compra:borrador:v1";
+const MAX_LADO = 1600;
+type Evento = { nombre: string; fecha: string; lugar: string | null; precioUnitario: number; yapeNumero: string; yapeTitular: string; yapeQrUrl: string | null };
+type Datos = { nombre: string; celular: string; email: string; cantidad: number; nombres: string[] };
+type Pago = { id: string; codigo: string; monto: string; archivo: File | null; preview: string | null };
+const inicio: Datos = { nombre: "", celular: "", email: "", cantidad: 1, nombres: [""] };
+const pagoNuevo = (id: string, monto = ""): Pago => ({ id, codigo: "", monto, archivo: null, preview: null });
+const centimos = (valor: string) => Math.round(Number(valor) * 100);
+const moneda = (valor: number) => `S/ ${(valor / 100).toFixed(2)}`;
 
-type Evento = {
-  nombre: string;
-  precioUnitario: number;
-  yapeNumero: string;
-  yapeTitular: string;
-  yapeQrUrl: string | null;
-};
-
-function cargarImagen(file: File) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(image);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error(`No pudimos leer ${file.name}.`));
-    };
-    image.src = url;
-  });
+async function comprimir(file: File) {
+  const url = URL.createObjectURL(file);
+  const imagen = await new Promise<HTMLImageElement>((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = url; });
+  URL.revokeObjectURL(url);
+  const escala = Math.min(1, MAX_LADO / Math.max(imagen.naturalWidth, imagen.naturalHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(imagen.naturalWidth * escala)); canvas.height = Math.max(1, Math.round(imagen.naturalHeight * escala));
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Tu navegador no pudo preparar el comprobante.");
+  context.fillStyle = "#fff"; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(imagen, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", .82));
+  if (!blob) throw new Error(`No pudimos comprimir ${file.name}.`);
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, "") || "comprobante"}.jpg`, { type: "image/jpeg" });
 }
 
-async function comprimirComprobante(file: File) {
-  const image = await cargarImagen(file);
-  const escala = Math.min(1, MAX_LADO_IMAGEN / Math.max(image.naturalWidth, image.naturalHeight));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(image.naturalWidth * escala));
-  canvas.height = Math.max(1, Math.round(image.naturalHeight * escala));
-  const context = canvas.getContext("2d");
-
-  if (!context) throw new Error("Tu navegador no pudo preparar el comprobante.");
-
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", CALIDAD_JPEG),
-  );
-
-  if (!blob) throw new Error(`No pudimos comprimir ${file.name}.`);
-
-  const nombreBase = file.name.replace(/\.[^.]+$/, "") || "comprobante";
-  return new File([blob], `${nombreBase}.jpg`, { type: "image/jpeg" });
+function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block"><span className="event-label">{label}</span>{children}</label>;
 }
 
 export function FormularioCompra({ evento }: { evento: Evento }) {
-  const [cantidad, setCantidad] = useState(1);
-  const [error, setError] = useState("");
-  const [enviando, setEnviando] = useState(false);
   const router = useRouter();
-  const total = cantidad * evento.precioUnitario;
+  const formDatos = useRef<HTMLFormElement>(null);
+  const proximoPago = useRef(2);
+  const nombreCompradorAnterior = useRef("");
+  const [paso, setPaso] = useState<1 | 2>(1);
+  const [datos, setDatos] = useState<Datos>(inicio);
+  const total = Math.round(datos.cantidad * evento.precioUnitario * 100);
+  const [pagos, setPagos] = useState<Pago[]>([pagoNuevo("pago-1", evento.precioUnitario.toFixed(2))]);
+  const [error, setError] = useState("");
+  const [codigoError, setCodigoError] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+  const [imagenesPendientes, setImagenesPendientes] = useState(false);
+  const suma = pagos.reduce((acum, pago) => acum + (Number.isFinite(centimos(pago.monto)) ? centimos(pago.monto) : 0), 0);
+  const diferencia = total - suma;
+  const listo = pagos.every((p) => /^\d{8}$/.test(p.codigo) && p.archivo && Number(p.monto) > 0) && diferencia === 0;
 
-  async function enviar(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setEnviando(true);
-    setError("");
-
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const form = event.currentTarget;
-      const original = new FormData(form);
-      const archivos = original
-        .getAll("comprobantes")
-        .filter((value): value is File => value instanceof File && value.size > 0);
-      const comprimidos = await Promise.all(archivos.map(comprimirComprobante));
-      const body = new FormData(form);
-      body.delete("comprobantes");
-      comprimidos.forEach((archivo) => body.append("comprobantes", archivo));
+      const raw = localStorage.getItem(BORRADOR_KEY); if (!raw) return;
+      const draft = JSON.parse(raw) as { paso?: number; datos?: Datos; pagos?: { codigo: string; monto: string }[] };
+      if (!draft.datos || !Array.isArray(draft.pagos)) return;
+      const cantidad = Math.min(20, Math.max(1, Number(draft.datos.cantidad) || 1));
+      timer = setTimeout(() => {
+        setDatos({ ...inicio, ...draft.datos, cantidad, nombres: Array.from({ length: cantidad }, (_, i) => draft.datos?.nombres?.[i] ?? "") });
+        setPagos((draft.pagos!.length ? draft.pagos! : [{ codigo: "", monto: (cantidad * evento.precioUnitario).toFixed(2) }]).map((p, i) => ({ ...pagoNuevo(`pago-${i + 1}`), codigo: String(p.codigo).replace(/\D/g, "").slice(0, 8), monto: String(p.monto) })));
+        setPaso(draft.paso === 2 ? 2 : 1); setImagenesPendientes(draft.paso === 2 && draft.pagos!.length > 0); proximoPago.current = Math.max(2, draft.pagos!.length + 1);
+      }, 0);
+    } catch { localStorage.removeItem(BORRADOR_KEY); }
+    return () => { if (timer) clearTimeout(timer); };
+  }, [evento.precioUnitario]);
 
-      const response = await fetch("/api/registros", { method: "POST", body });
-      const result = (await response.json()) as { id?: string; error?: string };
+  useEffect(() => {
+    const vacio = paso === 1 && datos.nombre === "" && datos.celular === "" && datos.email === "" && datos.cantidad === 1 && pagos.length === 1 && pagos[0].codigo === "";
+    if (vacio) localStorage.removeItem(BORRADOR_KEY);
+    else localStorage.setItem(BORRADOR_KEY, JSON.stringify({ paso, datos, pagos: pagos.map(({ codigo, monto }) => ({ codigo, monto })) }));
+  }, [paso, datos, pagos]);
 
-      if (!response.ok || !result.id) {
-        throw new Error(result.error ?? "No pudimos registrar tu compra.");
-      }
+  useEffect(() => {
+    if (pagos.length !== 1) return;
+    const automatico = (total / 100).toFixed(2);
+    if (pagos[0].monto === automatico) return;
+    const timer = setTimeout(() => setPagos((lista) => [{ ...lista[0], monto: automatico }]), 0);
+    return () => clearTimeout(timer);
+  }, [pagos, total]);
 
-      router.push(`/gracias/${result.id}`);
-    } catch (caught) {
-      setEnviando(false);
-      setError(caught instanceof Error ? caught.message : "No pudimos registrar tu compra.");
-    }
+  useEffect(() => {
+    const anterior = nombreCompradorAnterior.current;
+    nombreCompradorAnterior.current = datos.nombre;
+    if (datos.nombres[0] !== "" && datos.nombres[0] !== anterior) return;
+    if (datos.nombres[0] === datos.nombre) return;
+    const timer = setTimeout(() => setDatos((actual) => ({
+      ...actual,
+      nombres: actual.nombres.map((nombre, index) => index === 0 ? actual.nombre : nombre),
+    })), 0);
+    return () => clearTimeout(timer);
+  }, [datos.nombre, datos.nombres]);
+
+  function cantidad(nueva: number) {
+    const valor = Math.min(20, Math.max(1, nueva));
+    setDatos((d) => ({ ...d, cantidad: valor, nombres: Array.from({ length: valor }, (_, i) => d.nombres[i] ?? "") }));
+    if (pagos.length === 1) setPagos((p) => [{ ...p[0], monto: (valor * evento.precioUnitario).toFixed(2) }]);
+  }
+  function cambiarPago(id: string, cambio: Partial<Pago>) { setPagos((lista) => lista.map((p) => p.id === id ? { ...p, ...cambio } : p)); if (cambio.codigo !== undefined) setCodigoError(""); }
+  function archivo(id: string, file: File | null) { setPagos((lista) => lista.map((p) => { if (p.id !== id) return p; if (p.preview) URL.revokeObjectURL(p.preview); return { ...p, archivo: file, preview: file ? URL.createObjectURL(file) : null }; })); setImagenesPendientes(false); }
+  function cancelar() {
+    if (!window.confirm("¿Cancelar la compra y borrar todos los datos ingresados?")) return;
+    pagos.forEach((p) => { if (p.preview) URL.revokeObjectURL(p.preview); }); localStorage.removeItem(BORRADOR_KEY);
+    setDatos(inicio); setPagos([pagoNuevo("pago-1", evento.precioUnitario.toFixed(2))]); setPaso(1); setError(""); setCodigoError(""); setImagenesPendientes(false); proximoPago.current = 2;
+  }
+  async function copiar() { await navigator.clipboard.writeText(evento.yapeNumero); setCopiado(true); window.setTimeout(() => setCopiado(false), 1800); }
+  async function enviar(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!listo) return; setEnviando(true); setError(""); setCodigoError("");
+    try {
+      const body = new FormData(); body.set("nombrePagador", datos.nombre.trim()); body.set("celular", datos.celular.trim()); body.set("email", datos.email.trim()); body.set("cantidadPersonas", String(datos.cantidad));
+      datos.nombres.forEach((n) => body.append("nombresPersonas", n.trim()));
+      for (const p of pagos) { body.append("comprobantes", await comprimir(p.archivo!)); body.append("codigosOperacion", p.codigo); body.append("montosComprobantes", p.monto); }
+      const response = await fetch("/api/registros", { method: "POST", body }); const result = await response.json() as { id?: string; error?: string; codigoOperacion?: string };
+      if (!response.ok || !result.id) { if (result.codigoOperacion) setCodigoError(result.codigoOperacion); throw new Error(result.error ?? "No pudimos registrar tu compra."); }
+      localStorage.removeItem(BORRADOR_KEY); router.push(`/gracias/${result.id}`);
+    } catch (e) { setEnviando(false); setError(e instanceof Error ? e.message : "No pudimos registrar tu compra."); }
   }
 
-  return (
-    <main className="mx-auto max-w-2xl px-5 py-12">
-      <p className="text-sm font-semibold text-violet-700">ENTRADAS</p>
-      <h1 className="mt-2 text-3xl font-bold">{evento.nombre}</h1>
-
-      <section className="mt-6 grid gap-5 rounded-2xl bg-violet-50 p-5 sm:grid-cols-[1fr_auto]">
-        <div>
-          <p className="font-semibold">Pago por Yape</p>
-          <p className="text-2xl font-bold">{evento.yapeNumero}</p>
-          <p className="text-sm">Titular: {evento.yapeTitular}</p>
-          <p className="mt-3 font-semibold">Total exacto: S/ {total.toFixed(2)}</p>
-        </div>
-        {evento.yapeQrUrl ? (
-          // El QR es un asset local entregado por el organizador; no se genera ni altera.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`QR de Yape de ${evento.yapeTitular}`}
-            className="h-40 w-40 rounded-xl bg-white object-contain p-2"
-            height={160}
-            src={evento.yapeQrUrl}
-            width={160}
-          />
-        ) : (
-          <p className="max-w-40 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-            QR pendiente. Usa el número de Yape mostrado.
-          </p>
-        )}
-      </section>
-
-      <form className="mt-6 space-y-4" onSubmit={enviar}>
-        <label className="block">Nombre<input required name="nombrePagador" maxLength={120} className="mt-1 w-full rounded border p-3" /></label>
-        <label className="block">Celular<input required name="celular" inputMode="tel" maxLength={30} className="mt-1 w-full rounded border p-3" /></label>
-        <label className="block">Correo<input required name="email" type="email" maxLength={254} className="mt-1 w-full rounded border p-3" /></label>
-        <label className="block">Entradas<select name="cantidadPersonas" value={cantidad} onChange={(event) => setCantidad(Number(event.target.value))} className="mt-1 w-full rounded border p-3">{Array.from({ length: 20 }, (_, index) => index + 1).map((value) => <option key={value}>{value}</option>)}</select></label>
-
-        {cantidad > 1 && (
-          <fieldset className="space-y-3 rounded-xl border p-4">
-            <legend className="px-1 font-semibold">Nombres en las entradas (opcional)</legend>
-            <p className="text-sm text-slate-500">Puedes dejar cualquier nombre vacío y completarlo después.</p>
-            {Array.from({ length: cantidad }, (_, index) => (
-              <label className="block" key={index}>
-                Entrada {index + 1}
-                <input name="nombresPersonas" maxLength={120} className="mt-1 w-full rounded border p-3" aria-label={`Nombre para entrada ${index + 1}`} />
-              </label>
-            ))}
-          </fieldset>
-        )}
-
-        <label className="block">
-          Comprobante(s)
-          <input required name="comprobantes" type="file" multiple accept="image/jpeg,image/png,image/webp" className="mt-1 block" />
-          <span className="block text-sm text-slate-500">JPG, PNG o WebP. Reducimos cada imagen a 1600 px antes de enviarla; máximo final 5 MB.</span>
-        </label>
-        {error && <p className="rounded bg-red-50 p-3 text-red-700">{error}</p>}
-        <button disabled={enviando} className="w-full rounded bg-violet-700 p-3 font-semibold text-white disabled:opacity-60">{enviando ? "Preparando comprobante…" : `Registrar compra — S/ ${total.toFixed(2)}`}</button>
-      </form>
-    </main>
-  );
+  return <main data-compra-pasos className="min-h-screen bg-cream px-3 py-5 text-ink sm:px-6 sm:py-10"><div className="mx-auto max-w-md"><div className="relative z-10 mb-4 overflow-hidden shadow-brutal-sm"><NextImage src="/evento-banner.png" alt="II Open Championship" width={719} height={344} priority className="h-auto w-full" /></div>
+    <header className="relative mb-7"><span className="absolute -right-3 -top-3 h-20 w-20 rounded-full bg-event-red" aria-hidden /><span className="absolute -left-2 bottom-1 h-14 w-14 rotate-45 bg-event-blue" aria-hidden /><div className="relative bg-ink p-5 text-cream shadow-brutal-sm"><div className="mb-3 flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-event-red" /><span className="text-xs font-extrabold tracking-[.18em] text-event-yellow uppercase">Evento limitado</span></div><h1 className="[overflow-wrap:anywhere] text-4xl font-black leading-[.92] tracking-[-.045em] uppercase">{evento.nombre}</h1><div className="mt-5 grid grid-cols-[1fr_auto_1fr] gap-3 text-sm font-semibold"><div><span className="block text-[.65rem] tracking-widest text-event-yellow uppercase">Fecha y hora</span>{evento.fecha}</div><span className="h-9 w-px bg-cream/20" /><div><span className="block text-[.65rem] tracking-widest text-event-yellow uppercase">Lugar</span>{evento.lugar ?? "Por confirmar"}</div></div></div></header>
+    <div className="mb-3 flex items-center justify-between text-xs font-black tracking-[.1em] uppercase"><span>Paso {paso} de 2 — {paso === 1 ? "Tus datos" : "Pago"}</span><span className="bg-event-yellow px-2 py-1">Total {moneda(total)}</span></div><div className="mb-5 grid grid-cols-2 gap-2" aria-hidden><span className="h-1 bg-event-red" /><span className={`h-1 ${paso === 2 ? "bg-event-red" : "bg-ink/15"}`} /></div>
+    <div key={paso} className="motion-safe:animate-[step-in_.22s_ease-out]">{paso === 1 ?
+      <form ref={formDatos} onSubmit={(e) => { e.preventDefault(); if (formDatos.current?.reportValidity()) { setError(""); setPaso(2); } }} className="event-panel space-y-5"><div><h2 className="text-2xl font-black uppercase">Entrada general</h2><p className="text-sm text-neutral-500">Completa tus datos antes de realizar el pago.</p><p className="mt-3 border-l-4 border-event-yellow bg-cream px-3 py-2 text-sm font-bold">Niños mayores de 5 años pagan entrada.</p></div>
+        <Campo label="Nombre del comprador"><input aria-label="Nombre del comprador" required value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} maxLength={120} autoComplete="name" placeholder="María Fernández" className="ticket-input" /></Campo>
+        <div className="grid grid-cols-2 gap-4"><Campo label="Celular"><input aria-label="Celular" required value={datos.celular} onChange={(e) => setDatos({ ...datos, celular: e.target.value })} inputMode="tel" maxLength={30} autoComplete="tel" placeholder="999 888 777" className="ticket-input" /></Campo><div><span className="event-label">Entradas</span><div className="flex h-11 items-center border-2 border-ink/20"><button type="button" aria-label="Reducir entradas" onClick={() => cantidad(datos.cantidad - 1)} disabled={datos.cantidad === 1} className="h-full w-11 text-xl font-black disabled:opacity-25">−</button><output aria-label="Entradas" className="flex-1 text-center text-lg font-black">{datos.cantidad}</output><button type="button" aria-label="Aumentar entradas" onClick={() => cantidad(datos.cantidad + 1)} disabled={datos.cantidad === 20} className="h-full w-11 text-xl font-black disabled:opacity-25">+</button></div></div></div>
+        <Campo label="Correo"><input aria-label="Correo" required value={datos.email} onChange={(e) => setDatos({ ...datos, email: e.target.value })} type="email" autoComplete="email" maxLength={254} placeholder="maria@correo.com" className="ticket-input" /></Campo>
+        {datos.cantidad > 1 && <fieldset className="border-2 border-dashed border-ink/15 p-4"><legend className="px-1 text-xs font-bold tracking-wider text-neutral-500 uppercase">Nombres en las entradas (opcional)</legend><div className="mt-2 space-y-3">{datos.nombres.map((n, i) => <label className="flex items-center gap-3" key={i}><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-event-yellow text-xs font-black">{i + 1}</span><input value={n} onChange={(e) => setDatos({ ...datos, nombres: datos.nombres.map((actual, indice) => indice === i ? e.target.value : actual) })} maxLength={120} className="ticket-input py-1.5 text-sm" aria-label={`Nombre para entrada ${i + 1}`} placeholder={`Persona ${i + 1}`} /></label>)}</div></fieldset>}
+        <div className="grid gap-3 pt-2"><button className="event-button">Siguiente</button><button type="button" onClick={cancelar} className="event-button-outline">Cancelar</button></div></form> :
+      <form onSubmit={enviar} className="overflow-hidden bg-white shadow-[0_0_0_1px_rgba(28,28,28,.12)]"><section className="border-b-2 border-dashed border-ink/20 p-5"><div className="flex items-start justify-between gap-3"><div><h2 className="text-2xl font-black uppercase">Revisa tu compra</h2><p className="text-sm text-neutral-500">Confirma tus datos antes de pagar.</p></div><button type="button" onClick={() => setPaso(1)} className="text-xs font-black text-event-blue underline decoration-2 underline-offset-4">Editar datos</button></div><dl className="mt-5 grid gap-3 text-sm"><div><dt className="event-label">Comprador</dt><dd className="font-bold">{datos.nombre}</dd></div><div className="grid grid-cols-2 gap-3"><div><dt className="event-label">Celular</dt><dd className="font-bold">{datos.celular}</dd></div><div><dt className="event-label">Entradas</dt><dd className="font-bold">{datos.cantidad}</dd></div></div><div><dt className="event-label">Correo</dt><dd className="break-all font-bold">{datos.email}</dd></div>{datos.nombres.some(Boolean) && <div><dt className="event-label">Nombres asignados</dt><dd className="font-bold">{datos.nombres.filter(Boolean).join(", ")}</dd></div>}</dl></section>
+        <section className="p-5"><p className="event-kicker">Paga con Yape</p><h2 className="mb-5 text-xl font-black uppercase">Sigue estos pasos</h2><div className="mb-5 grid grid-cols-[7.25rem_1fr] gap-3 border-2 border-ink/10 p-3"><div className="grid aspect-square place-items-center bg-white p-1 text-center text-[.62rem] font-bold ring-1 ring-ink/10">{evento.yapeQrUrl ? <NextImage src={evento.yapeQrUrl} alt={`QR de Yape de ${evento.yapeTitular}`} width={116} height={116} className="h-full w-full object-contain" /> : <span>QR YAPE<br />NO DISPONIBLE</span>}</div><div className="min-w-0 self-center"><span className="event-label">Número Yape</span><strong className="block break-all text-xl">{evento.yapeNumero}</strong><button type="button" onClick={copiar} className="text-xs font-black text-event-blue underline underline-offset-4">{copiado ? "Número copiado" : "Copiar número"}</button><span className="event-label mt-3">Monto exacto</span><strong className="text-2xl">{moneda(total)}</strong><p className="text-xs text-neutral-500">{evento.yapeTitular}</p></div></div>{!evento.yapeQrUrl && <p className="event-note mb-5">El QR aún no está disponible. Yapea al número mostrado.</p>}
+        <div className="space-y-4">{pagos.map((p, i) => <fieldset key={p.id} className="border-2 border-ink/10 p-4"><legend className="px-1 text-xs font-black tracking-wider uppercase">Pago {i + 1}</legend><div className="space-y-4"><Campo label="Código de operación — 8 dígitos"><input aria-label={i ? `Código de operación ${i + 1}` : "Código de operación"} value={p.codigo} onChange={(e) => cambiarPago(p.id, { codigo: e.target.value.replace(/\D/g, "").slice(0, 8) })} inputMode="numeric" maxLength={8} placeholder="00012345" className={`ticket-input ${codigoError === p.codigo ? "border-event-red" : ""}`} />{codigoError === p.codigo && <span className="mt-1 block text-xs font-bold text-event-red">El código de operación ya fue enviado.</span>}</Campo><Campo label="Monto pagado"><input aria-label={i ? `Monto pagado ${i + 1}` : "Monto pagado"} value={p.monto} onChange={(e) => cambiarPago(p.id, { monto: e.target.value })} readOnly={pagos.length === 1} inputMode="decimal" className="ticket-input read-only:text-neutral-500" /></Campo><label className="block"><span className="event-label">Comprobante</span><span onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); archivo(p.id, e.dataTransfer.files[0] ?? null); }} className="grid min-h-28 cursor-pointer grid-cols-[1fr_4.5rem] items-center gap-3 border-2 border-dashed border-ink/20 p-3"><span className="text-sm font-bold">{p.archivo ? "Reemplazar imagen" : "Toma una foto o selecciona tu archivo"}<small className="mt-1 block font-normal text-neutral-500">JPG, PNG o WebP · máx. 5 MB</small></span>{p.preview ? <img src={p.preview} alt="Vista previa del comprobante" className="h-16 w-16 object-cover" /> : <span className="grid h-16 w-16 place-items-center bg-cream text-3xl" aria-hidden>↑</span>}<input aria-label={i ? `Comprobante ${i + 1}` : "Comprobante(s)"} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" onChange={(e) => archivo(p.id, e.target.files?.[0] ?? null)} /></span></label></div>{pagos.length > 1 && <button type="button" onClick={() => { if (p.preview) URL.revokeObjectURL(p.preview); setPagos((lista) => lista.filter((item) => item.id !== p.id)); }} className="mt-3 text-xs font-black text-event-red underline underline-offset-4">Quitar pago</button>}</fieldset>)}</div>
+        <button type="button" onClick={() => setPagos((lista) => [...lista, pagoNuevo(`pago-${proximoPago.current++}`)])} className="mt-4 w-full border-2 border-dashed border-event-blue/30 py-3 text-sm font-black text-event-blue">+ Agregar otro pago <span className="font-normal">(opcional)</span></button>{imagenesPendientes && <p role="status" className="mt-4 border-l-4 border-event-yellow bg-cream p-3 text-sm">Restauramos tus datos. Por seguridad, vuelve a seleccionar cada comprobante.</p>}{diferencia !== 0 && <p role="status" className="mt-4 text-center text-sm font-bold text-event-red">{diferencia > 0 ? `Falta declarar ${moneda(diferencia)}.` : `El monto excede el total por ${moneda(Math.abs(diferencia))}.`}</p>}{error && <p role="alert" className="mt-4 bg-event-red px-3 py-2 text-sm font-semibold text-white">{error}</p>}<div className="mt-5 grid gap-3"><button disabled={enviando || !listo} className="event-button">{enviando ? "Preparando comprobantes…" : "Registrar compra"}</button><button type="button" onClick={cancelar} disabled={enviando} className="event-button-outline">Cancelar</button></div><p className="mt-4 text-center text-xs text-neutral-500">Revisaremos tu pago y enviaremos un correo de recepción. La confirmación con tus entradas llegará después.</p></section></form>}
+    </div><a href="/reenviar" className="mt-6 block text-center text-sm font-semibold text-event-blue underline decoration-2 underline-offset-4">¿No llegó tu correo? Reenviar entradas</a></div></main>;
 }

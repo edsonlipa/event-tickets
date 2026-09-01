@@ -1,7 +1,6 @@
 import "server-only";
 
 import { getDb } from "@/lib/db";
-import { inicioDiaLimaUtc } from "@/lib/fecha";
 
 export type ComprobanteAdmin = {
   id: string;
@@ -85,16 +84,13 @@ export async function obtenerRegistro(id: string) {
 
 export async function obtenerContadores() {
   const db = getDb();
-  const inicioUtc = inicioDiaLimaUtc();
-  const [evento, entradas, pendientes, correos] = await Promise.all([
+  const [evento, entradas, pendientes] = await Promise.all([
     db.from("evento").select("aforo_maximo").maybeSingle(),
     db.from("entradas").select("id", { count: "exact", head: true }).eq("anulada", false),
     db.from("registros").select("cantidad_personas").eq("status", "pendiente"),
-    db.from("email_envios").select("id", { count: "exact", head: true }).eq("exito", true).gte("created_at", inicioUtc),
   ]);
   return {
     aforoMaximo: evento.data?.aforo_maximo ?? null,
     ocupadas: (entradas.count ?? 0) + (pendientes.data ?? []).reduce((total, item) => total + item.cantidad_personas, 0),
-    correosHoy: correos.count ?? 0,
   };
 }
