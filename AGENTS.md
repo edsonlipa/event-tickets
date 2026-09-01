@@ -33,12 +33,37 @@ es histórico y no es una fuente de decisiones.
   en el navegador.
 - El consumo del QR es atómico: nunca separar la lectura de `usado` y su update.
 
+## Invariantes del producto
+
+- Los QR contienen `${NEXT_PUBLIC_SITE_URL}/v/<uuid>`; `/v/[token]` solo muestra
+  la entrada y nunca la consume.
+- El pago y el correo son estados independientes. Un fallo de Nodemailer/Zoho o
+  Resend no revierte la confirmación; se registra y queda disponible para reintento.
+- Toda entrada pública se valida otra vez en el servidor. Registros, reenvío y PIN
+  conservan rate limit persistente; el reenvío siempre responde de forma genérica.
+- La búsqueda de puerta no devuelve email ni celular completo. La precarga y cola
+  offline son degradadas e idempotentes al sincronizar.
+- Ajustar una compra pagada crea nuevas entradas o anula entradas no usadas;
+  nunca borra QR emitidos ni anula una entrada ya usada.
+- Los tiempos se almacenan como `timestamptz` y se presentan en `America/Lima`.
+- Nombre, fecha/hora, lugar, aforo y datos Yape provienen de la fila `evento`; no
+  se hardcodean en componentes.
+
+## Secretos y configuración
+
+- Nunca versionar `.env.local` ni credenciales. Mantener `.env.local.example`
+  actualizado exclusivamente con valores vacíos o seguros.
+- El proveedor de correo se selecciona con `EMAIL_SENDING_PROVIDER`; las claves
+  SMTP/Zoho, Resend, `service_role`, PIN y secretos de sesión son solo de servidor.
+
 ## Verificación mínima
 
 Tras un cambio relevante ejecutar `npm run typecheck`, `npm run lint` y
 `npm run build`. Para cambios de esquema, reiniciar Supabase local, aplicar las
 migraciones y comprobar que la anon key no puede leer tablas. Para flujos de UI,
 recargar y volver a leer desde la base antes de considerar verificada una acción.
+Las aceptaciones de correo requieren Gmail, Outlook e iCloud; las de puerta
+requieren dos dispositivos reales y la prueba presencial del runbook.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
