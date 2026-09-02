@@ -82,10 +82,6 @@ body {
   }
 }
 
-[data-compra-pasos] .event-button-outline {
-  display: none;
-}
-
 /* El banner oficial ya contiene el nombre; conservar el h1 para reactivarlo. */
 [data-compra-pasos] header h1 {
   display: none;
@@ -111,8 +107,15 @@ body {
 
 @layer components {
   .event-shell {
-    @apply min-h-screen bg-cream px-4 py-8 text-ink sm:px-6 sm:py-12;
+    @apply min-h-dvh bg-cream px-4 pt-8 text-ink sm:px-6 sm:pt-12;
+    /* La barra inferior del navegador móvil se superpone al viewport: sin
+       este colchón el último elemento queda tapado y el scroll ya topó. */
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
     background-image: radial-gradient(circle at 94% 8%, var(--event-red) 0 44px, transparent 45px), linear-gradient(135deg, transparent 0 78%, color-mix(in srgb, var(--event-yellow) 20%, transparent) 78% 82%, transparent 82%);
+  }
+
+  .event-compra-shell {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
 
   .event-kicker {
