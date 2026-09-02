@@ -15,7 +15,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-008 | Como comprador, quiero una interfaz clara y atractiva que conserve toda la seguridad y los datos dinámicos del sistema. | P1 | Hecho | UI móvil revisada; E2E de compra, typecheck, lint y build aprobados |
 | US-009 | Como usuario, quiero una experiencia visual coherente en compra, admin y puerta para reconocer y operar el sistema con claridad. | P1 | Hecho | SDD; revisión visual móvil; typecheck, lint y build aprobados |
 | US-010 | Como comprador, quiero recibir un acuse con el detalle de mi compra para saber que fue registrada y que la confirmación llegará después. | P0 | Hecho | E2E real confirmado por el operador: ambos correos llegan correctamente |
-| US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Bloqueado | Código y test añadidos; falta ejecutar E2E aislado o real |
+| US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Hecho | HTTP 409 y mensaje verificados; E2E aislado confirma un solo comprobante persistido |
 | US-012 | Como comprador, quiero registrar mis datos y pagar en pasos claros para revisar el monto antes de enviar mis comprobantes. | P0 | Hecho | Flujo productivo confirmado; 8 E2E locales validan UI, API, Storage, concurrencia y relectura desde Supabase |
 | US-013 | Como operador, quiero que los correos fallidos se reintenten sin una cuota diaria artificial para recuperar entregas temporales sin duplicarlas. | P0 | Pendiente | SDD; retirar cuota conservando cron, lote técnico, claims y auditoría |
 

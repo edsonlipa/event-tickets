@@ -14,7 +14,7 @@
 | Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. Zoho/Resend y entrega real pendientes. |
 | Reintento de correo | US-013 diseñada y pendiente: retirar la cuota diaria artificial, conservar cron protegido como recuperación, lote técnico, claims atómicos y auditoría. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
-| Código duplicado | US-011 implementada: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. E2E pendiente. |
+| Código duplicado | US-011 hecha: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. El E2E aislado confirma que queda un solo comprobante. |
 | Acceso LAN de puerta | Corregido: Next.js permite el origen de desarrollo `192.168.3.111`; login verifica la cookie antes de navegar. Cámara móvil continúa requiriendo HTTPS por política del navegador. |
 | Hidratación móvil | El warning provenía de atributos `__gcr*` inyectados por Chrome antes de React; los nodos afectados los toleran. El escáner ahora informa explícitamente falta de HTTPS, permiso o cámara. |
 | Compra pública | US-002 hecha: compra de 3 entradas con nombres, compresión a 1600 px, Storage privado, aforo y rate limit atómicos; 4 pruebas E2E releen base y archivo. |
@@ -43,7 +43,7 @@ correo permanece bloqueada en US-004/US-007 y no se confunde con esta prueba loc
 Nodemailer solo permite SMTP sin TLS en hosts loopback; los hosts reales conservan
 `requireTLS` cuando no usan SMTPS.
 
-US-012 aprobó las 8 pruebas E2E de compra contra Supabase local y Mailpit.
+US-011 y US-012 aprobaron las 8 pruebas E2E de compra contra Supabase local y Mailpit.
 Playwright ahora aborta si la URL de Supabase no es exactamente la local,
 por lo que el enlace de la CLI y las credenciales productivas no pueden convertir
 esta suite destructiva en una ejecución remota accidental.
