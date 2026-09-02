@@ -11,7 +11,7 @@
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. La migración 0013 inserta el evento oficial en proyectos hospedados vacíos, donde `db push` no ejecuta el seed. |
-| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. US-007 hecha: Zoho real entrega en Gmail y Outlook con SPF, DKIM y DMARC; iCloud fue excluido por decisión del producto. |
+| Correo | US-004 y US-007 hechas: QR real recibido en Gmail; Zoho entrega en Outlook con SPF, DKIM y DMARC. Producto excluyó iCloud y aceptó monitorear la clasificación inicial de Outlook como no deseado. |
 | Reintento de correo | US-013 diseñada y pendiente: retirar la cuota diaria artificial, conservar cron protegido como recuperación, lote técnico, claims atómicos y auditoría. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
 | Código duplicado | US-011 hecha: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. El E2E aislado confirma que queda un solo comprobante. |
@@ -33,8 +33,7 @@
 
 La compra E2E de producción ya está validada en Mac y iPhone, con el correo de
 QR recibido, así que el envío real funciona sobre `openchampionship.illapa.pe`.
-Queda ejecutar la matriz Gmail/Outlook/iCloud que US-004 exige, correr el cron
-con autorización Bearer y luego `docs/RUNBOOK_EVENTO.md` en el local con los
+Queda correr el cron con autorización Bearer y luego `docs/RUNBOOK_EVENTO.md` en el local con los
 dispositivos reales para cerrar la puerta en dos celulares.
 
 La conformidad completa está desglosada en `docs/AUDITORIA_PRD_2026-09-01.md`.
@@ -43,7 +42,8 @@ E2E de compra. Se reprodujo y corrigió un defecto de aislamiento: Playwright
 heredaba `SMTP_HOST` y credenciales Zoho desde `.env.local`, por lo que envió los
 destinatarios ficticios `@example.test` al SMTP real. El web server E2E ahora
 fuerza Mailpit (`127.0.0.1:55425`, sin TLS ni credenciales). La aceptación real de
-correo permanece bloqueada en US-004/US-007 y no se confunde con esta prueba local.
+US-004/US-007 se cerró después con la excepción de producto documentada y no se
+confunde con esta prueba local.
 Nodemailer solo permite SMTP sin TLS en hosts loopback; los hosts reales conservan
 `requireTLS` cuando no usan SMTPS.
 

@@ -60,3 +60,6 @@ administrativo y autoservicio, y publicar la landing de lectura nativa del QR.
 4. Reenvío admin funciona y autoservicio responde igual para email existente o no.
 5. Cron sin secreto devuelve 401 y respeta la cuota diaria.
 6. Typecheck, lint, build, E2E y RLS finalizan correctamente.
+7. La aceptación externa se cerró el 2 de septiembre de 2026 con QR real en
+   Gmail y entrega en Outlook con SPF, DKIM y DMARC aprobados. El responsable
+   del producto excluyó iCloud y aceptó monitorear el riesgo de spam en Outlook.

@@ -293,6 +293,11 @@ en el cuerpo, no como adjuntos sueltos, y ninguno cae en spam. Probar en los tre
 no en uno. Y: forzando un fallo de envío, el registro queda `pagado` con
 `email_error` y el cron lo drena en la corrida siguiente.
 
+**Excepción aceptada el 2 de septiembre de 2026:** el responsable del producto
+cerró la aceptación con QR real en Gmail y entrega autenticada en Outlook. iCloud
+queda fuera del alcance y la clasificación inicial de Outlook como no deseado se
+acepta como riesgo que se observará durante la operación productiva.
+
 ### Día 5 — Vie 4 sep — Vista guardia + PWA
 
 - [x] `/puerta`: PIN → cookie firmada `httpOnly` con expiración al fin del evento

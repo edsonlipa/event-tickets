@@ -139,14 +139,14 @@ construyen con `NEXT_PUBLIC_SITE_URL`.
 
 ## 6. Correo y cron
 
-- [ ] Confirmar `EMAIL_REPLY_TO` definitivo.
-- [ ] Si se usa Zoho, verificar alias remitente, contraseña de aplicación y TLS.
+- [x] Confirmar `EMAIL_REPLY_TO` definitivo: `admin@illapasystems.com`.
+- [x] Si se usa Zoho, verificar alias remitente, contraseña de aplicación y TLS.
 - [ ] Si se usa Resend, confirmar dominio verificado y API key de producción.
 - [x] Registrar una compra controlada con un correo real autorizado.
 - [x] Confirmar correo de recepción inicial.
 - [x] Confirmar pago desde admin y recibir el correo con todos los QR.
-- [ ] Verificar asunto, remitente, Reply-To, imágenes CID y enlaces HTTPS.
-- [ ] Repetir recepción en Gmail, Outlook e iCloud.
+- [x] Verificar asunto, remitente, Reply-To, imágenes CID y enlaces HTTPS.
+- [x] Repetir recepción en Gmail y Outlook. iCloud fue excluido por decisión del producto; Outlook llegó a no deseado y el riesgo fue aceptado.
 - [ ] Ejecutar el cron con autorización Bearer correcta y confirmar auditoría.
 - [ ] Confirmar que un fallo de correo no revierte el estado del pago.
 
