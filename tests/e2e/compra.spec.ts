@@ -57,8 +57,7 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
   const codigoOperacion = String(randomInt(10_000_000, 100_000_000));
   await page.setExtraHTTPHeaders({ "x-forwarded-for": `e2e-${randomUUID()}` });
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "OpenChampionship UNA" })).toBeVisible();
-  await expect(page.getByRole("img", { name: /QR de Yape/i })).toBeVisible();
+  await expect(page.locator("h1")).toHaveText("II OPEN CHAMPIONSHIP");
   await page.getByLabel("Nombre del comprador").fill("Comprador de prueba");
   await page.getByLabel("Celular").fill("999999999");
   await page.getByLabel("Correo").fill(`${randomUUID()}@example.test`);
@@ -69,8 +68,9 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
   await page.getByLabel("Nombre para entrada 3").fill("Carla");
   await page.getByRole("button", { name: "Siguiente" }).click();
   await expect(page.getByText("Paso 2 de 2 — Pago")).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR de Yape/i })).toBeVisible();
   await page.getByLabel("Código de operación").fill(codigoOperacion);
-  await page.getByLabel("Monto pagado").fill("45.00");
+  await expect(page.getByLabel("Monto pagado")).toHaveValue("45.00");
 
   const dataUrl = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -166,10 +166,10 @@ test("el monto es automático con un pago y editable al dividirlo", async ({ pag
   await expect(page.getByLabel("Nombre para entrada 1")).toHaveValue("Compra dividida");
   await page.getByRole("button", { name: "Reducir entradas" }).click();
   await page.getByRole("button", { name: "Siguiente" }).click();
-  await expect(page.getByLabel("Monto pagado")).toHaveValue("15.00");
-  await expect(page.getByLabel("Monto pagado")).toHaveAttribute("readonly", "");
+  await expect(page.getByLabel("Monto pagado", { exact: true })).toHaveValue("15.00");
+  await expect(page.getByLabel("Monto pagado", { exact: true })).toHaveAttribute("readonly", "");
   await page.getByRole("button", { name: /Agregar otro pago/i }).click();
-  await expect(page.getByLabel("Monto pagado")).not.toHaveAttribute("readonly", "");
+  await expect(page.getByLabel("Monto pagado", { exact: true })).not.toHaveAttribute("readonly", "");
   await expect(page.getByLabel("Monto pagado 2")).not.toHaveAttribute("readonly", "");
 });
 

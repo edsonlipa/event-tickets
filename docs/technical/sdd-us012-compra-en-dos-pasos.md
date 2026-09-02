@@ -9,15 +9,16 @@ solo se persisten al registrar el segundo paso.
 ## Experiencia acordada
 
 - Paso 1: nombre, celular, correo, selector `− / cantidad / +` (1–20) y nombres
-  opcionales por entrada. Acciones `Siguiente` y `Cancelar`.
+  opcionales por entrada. La acción `Siguiente` avanza sin persistir la compra.
 - Paso 2: resumen editable mediante `Editar datos`, total, QR/datos Yape y pagos
   numerados. Cada pago exige código de operación de exactamente 8 dígitos, monto
   positivo e imagen. La suma debe coincidir exactamente con el total.
 - QR y datos Yape permanecen lado a lado en móvil y el diseño conserva la
   identidad Bauhaus/ticket existente. La transición es breve y respeta
   `prefers-reduced-motion`.
-- `Cancelar` pide confirmación, borra el borrador y vuelve vacío al paso 1. Tras
-  registrar, se borra el borrador y se conserva la pantalla de agradecimiento.
+- No se muestra `Cancelar`: antes del registro no hay una compra persistida y
+  `Editar datos` cubre el retorno al primer paso. Tras registrar, se borra el
+  borrador y se conserva la pantalla de agradecimiento.
 - El borrador usa `localStorage` después de montar el Client Component para no
   producir diferencias de hidratación. Solo guarda texto; nunca imágenes.
 
@@ -40,7 +41,8 @@ solo se persisten al registrar el segundo paso.
 - Un único pago toma automáticamente el total. Al agregar pagos, cada monto es
   editable y se informa cuánto falta o excede.
 - Al restaurar un borrador del paso 2 se informa que las imágenes deben volver a
-  seleccionarse.
+  seleccionarse. La escritura del borrador comienza solo después de hidratarlo
+  para que el estado inicial vacío no elimine una restauración pendiente.
 
 ## Verificación
 

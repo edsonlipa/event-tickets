@@ -1,6 +1,6 @@
 # Estado de implementación
 
-> Actualizado: 1 de septiembre de 2026. Este documento se actualiza en el mismo
+> Actualizado: 2 de septiembre de 2026. Este documento se actualiza en el mismo
 > cambio que cierre o bloquee una historia.
 
 ## Resumen
@@ -19,7 +19,7 @@
 | Hidratación móvil | El warning provenía de atributos `__gcr*` inyectados por Chrome antes de React; los nodos afectados los toleran. El escáner ahora informa explícitamente falta de HTTPS, permiso o cámara. |
 | Compra pública | US-002 hecha: compra de 3 entradas con nombres, compresión a 1600 px, Storage privado, aforo y rate limit atómicos; 4 pruebas E2E releen base y archivo. |
 | UI de compra | US-008 hecha: estética tipo ticket adaptada del proyecto Lovable, datos dinámicos de `evento` y código/monto por comprobante; revisión móvil y E2E aprobados. |
-| Compra en pasos | US-012 implementada: el arte oficial de `Oficial redes.pdf` se sirve como banner responsive sobre el ticket; como el arte ya contiene el nombre, el `h1` dinámico del encabezado se conserva en código pero permanece oculto visualmente. El flujo móvil tiene dos pasos, resumen editable, aviso de entrada para mayores de 5 años, borrador textual, pagos múltiples y validación exacta en cliente/API/SQL. Se retiró Cancelar porque nada se persiste antes del registro y Editar datos cubre el retorno. Persona 1 hereda el nombre del comprador mientras no se edite manualmente. Con un pago el monto es automático y bloqueado; solo se vuelve editable al dividirlo; la interfaz explica que esta opción sirve cuando el total supera el límite diario de Yape. El QR ocupa su cuadro completo y copiar número es un icono adyacente. E2E automatizado pendiente por el servidor dev activo del operador. |
+| Compra en pasos | US-012 hecha: el arte oficial se sirve como banner responsive y el `h1` dinámico permanece oculto visualmente. El flujo móvil tiene dos pasos, resumen editable, aviso para mayores de 5 años, borrador textual, pagos múltiples y validación exacta en cliente/API/SQL. `Cancelar` fue retirado porque nada se persiste antes del registro y `Editar datos` cubre el retorno. Persona 1 hereda el comprador; el monto único es automático y solo se edita al dividir el pago. La hidratación ya no borra un borrador antes de restaurarlo. El flujo productivo fue confirmado y los 8 E2E aislados aprobaron UI, API, Storage, concurrencia y relectura local. |
 | Sistema visual | US-009 hecha: compra, confirmación, reenvío, entrada, admin y puerta comparten tokens y componentes Bauhaus; puerta conserva feedback verde/rojo de alto contraste. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
@@ -43,12 +43,10 @@ correo permanece bloqueada en US-004/US-007 y no se confunde con esta prueba loc
 Nodemailer solo permite SMTP sin TLS en hosts loopback; los hosts reales conservan
 `requireTLS` cuando no usan SMTPS.
 
-US-012 aprobó `typecheck`, `lint`, `build`, aplicación de la migración local y
-la comprobación RLS con anon en `evento`, `registros`, `comprobantes` y
-`entradas`. La suite de compra quedó actualizada, pero Next.js rechazó levantar
-el servidor E2E aislado en el puerto 3001 porque ya existe un `next dev` del
-operador en este repositorio (PID 52684). No se detuvo ese proceso ni se ejecutó
-la suite contra el puerto 3000 para evitar usar accidentalmente el SMTP real.
+US-012 aprobó las 8 pruebas E2E de compra contra Supabase local y Mailpit.
+Playwright ahora aborta si la URL de Supabase no es exactamente la local,
+por lo que el enlace de la CLI y las credenciales productivas no pueden convertir
+esta suite destructiva en una ejecución remota accidental.
 
 US-009 se verificó visualmente en móvil para reenvío, PIN y entrada inválida, y
 mediante `build`, `typecheck` y `lint`. No se ejecutó la suite E2E en esta iteración

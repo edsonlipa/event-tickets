@@ -48,6 +48,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [imagenesPendientes, setImagenesPendientes] = useState(false);
+  const [borradorListo, setBorradorListo] = useState(false);
   const suma = pagos.reduce((acum, pago) => acum + (Number.isFinite(centimos(pago.monto)) ? centimos(pago.monto) : 0), 0);
   const diferencia = total - suma;
   const listo = pagos.every((p) => /^\d{8}$/.test(p.codigo) && p.archivo && Number(p.monto) > 0) && diferencia === 0;
@@ -55,24 +56,37 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const raw = localStorage.getItem(BORRADOR_KEY); if (!raw) return;
+      const raw = localStorage.getItem(BORRADOR_KEY);
+      if (!raw) {
+        timer = setTimeout(() => setBorradorListo(true), 0);
+        return () => { if (timer) clearTimeout(timer); };
+      }
       const draft = JSON.parse(raw) as { paso?: number; datos?: Datos; pagos?: { codigo: string; monto: string }[] };
-      if (!draft.datos || !Array.isArray(draft.pagos)) return;
+      if (!draft.datos || !Array.isArray(draft.pagos)) {
+        localStorage.removeItem(BORRADOR_KEY);
+        timer = setTimeout(() => setBorradorListo(true), 0);
+        return () => { if (timer) clearTimeout(timer); };
+      }
       const cantidad = Math.min(20, Math.max(1, Number(draft.datos.cantidad) || 1));
       timer = setTimeout(() => {
         setDatos({ ...inicio, ...draft.datos, cantidad, nombres: Array.from({ length: cantidad }, (_, i) => draft.datos?.nombres?.[i] ?? "") });
         setPagos((draft.pagos!.length ? draft.pagos! : [{ codigo: "", monto: (cantidad * evento.precioUnitario).toFixed(2) }]).map((p, i) => ({ ...pagoNuevo(`pago-${i + 1}`), codigo: String(p.codigo).replace(/\D/g, "").slice(0, 8), monto: String(p.monto) })));
         setPaso(draft.paso === 2 ? 2 : 1); setImagenesPendientes(draft.paso === 2 && draft.pagos!.length > 0); proximoPago.current = Math.max(2, draft.pagos!.length + 1);
+        setBorradorListo(true);
       }, 0);
-    } catch { localStorage.removeItem(BORRADOR_KEY); }
+    } catch {
+      localStorage.removeItem(BORRADOR_KEY);
+      timer = setTimeout(() => setBorradorListo(true), 0);
+    }
     return () => { if (timer) clearTimeout(timer); };
   }, [evento.precioUnitario]);
 
   useEffect(() => {
+    if (!borradorListo) return;
     const vacio = paso === 1 && datos.nombre === "" && datos.celular === "" && datos.email === "" && datos.cantidad === 1 && pagos.length === 1 && pagos[0].codigo === "";
     if (vacio) localStorage.removeItem(BORRADOR_KEY);
     else localStorage.setItem(BORRADOR_KEY, JSON.stringify({ paso, datos, pagos: pagos.map(({ codigo, monto }) => ({ codigo, monto })) }));
-  }, [paso, datos, pagos]);
+  }, [borradorListo, paso, datos, pagos]);
 
   useEffect(() => {
     if (pagos.length !== 1) return;

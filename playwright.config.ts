@@ -7,6 +7,13 @@ try {
   // CI proporciona las variables directamente.
 }
 
+const supabaseE2eUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+if (supabaseE2eUrl !== "http://127.0.0.1:55421") {
+  throw new Error(
+    "Las pruebas E2E solo pueden ejecutarse contra Supabase local en http://127.0.0.1:55421.",
+  );
+}
+
 export default defineConfig({
   testDir: "./tests/e2e",
   use: { baseURL: "http://127.0.0.1:3001" },
