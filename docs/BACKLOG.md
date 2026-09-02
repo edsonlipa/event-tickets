@@ -18,6 +18,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Hecho | HTTP 409 y mensaje verificados; E2E aislado confirma un solo comprobante persistido |
 | US-012 | Como comprador, quiero registrar mis datos y pagar en pasos claros para revisar el monto antes de enviar mis comprobantes. | P0 | Hecho | Flujo productivo confirmado; 8 E2E locales validan UI, API, Storage, concurrencia y relectura desde Supabase |
 | US-013 | Como operador, quiero que los correos fallidos se reintenten sin una cuota diaria artificial para recuperar entregas temporales sin duplicarlas. | P0 | Pendiente | SDD; retirar cuota conservando cron, lote técnico, claims y auditoría |
+| US-014 | Como operador, quiero que todas las fechas y horas usen la zona de Perú para operar correctamente sin importar la configuración del servidor, la base o el dispositivo. | P0 | Pendiente | SDD; auditoría transversal y pruebas bajo zonas horarias distintas |
 
 ## Convenciones de estado
 
