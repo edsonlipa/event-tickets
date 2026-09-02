@@ -11,7 +11,7 @@
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. La migración 0013 inserta el evento oficial en proyectos hospedados vacíos, donde `db push` no ejecuta el seed. |
-| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. La entrega real en producción quedó demostrada en la compra E2E del 2 de septiembre de 2026. Falta la matriz Gmail/Outlook/iCloud que US-004 exige. |
+| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. US-007 hecha: Zoho real entrega en Gmail y Outlook con SPF, DKIM y DMARC; iCloud fue excluido por decisión del producto. |
 | Reintento de correo | US-013 diseñada y pendiente: retirar la cuota diaria artificial, conservar cron protegido como recuperación, lote técnico, claims atómicos y auditoría. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
 | Código duplicado | US-011 hecha: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. El E2E aislado confirma que queda un solo comprobante. |
@@ -60,9 +60,8 @@ para ese flujo; Playwright debe ejecutarse solo con su SMTP forzado a Mailpit.
 ## Bloqueos externos
 
 - Confirmar `EMAIL_REPLY_TO` definitivo.
-- Contraseña de aplicación/host Zoho o credencial Resend y despliegue para probar
-  entrega real en Gmail, Outlook e iCloud; hasta entonces US-004 y US-007 no
-  cumplen por completo sus criterios.
+- La clasificación inicial de Outlook como correo no deseado queda aceptada y se
+  seguirá observando en producción; no bloquea US-007.
 - Dos celulares reales y el dispositivo definitivo de los guardias para probar
   cámara, linterna, instalación, escaneo simultáneo y modo avión; hasta entonces
   US-005 no cumple por completo su criterio del PRD.

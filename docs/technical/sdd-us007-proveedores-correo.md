@@ -47,5 +47,7 @@ flujos de confirmación y reenvío. Nodemailer soportará Mailpit local y Zoho S
    lógica de negocio.
 4. Variables SMTP secretas no llegan al navegador ni aparecen en errores.
 5. Typecheck, lint, build y toda la suite E2E finalizan correctamente.
-6. La aceptación externa queda pendiente hasta probar Zoho con una contraseña de
-   aplicación y Gmail, Outlook e iCloud.
+6. Zoho se valida con contraseña de aplicación y entrega real autenticada en
+   Gmail y Outlook. El 2 de septiembre de 2026 el responsable del producto
+   excluyó iCloud del criterio y aceptó observar en producción la clasificación
+   inicial de Outlook como correo no deseado.
