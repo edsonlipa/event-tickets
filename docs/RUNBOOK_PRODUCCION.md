@@ -16,10 +16,10 @@
 | RLS y Storage privado | Confirmado | anon lee cero, insert bloqueado con 42501, bucket privado |
 | Usuario administrador | Confirmado | `arakado@illapa.pe`, rol `admin`; no registrar contraseña aquí |
 | Cuenta Vercel y repositorio GitHub | Confirmado | Confirmado por el operador el 1 de septiembre de 2026 |
-| Proyecto y variables Vercel | Pendiente | |
-| Dominio `openchampionship.illapasystems.com` | Pendiente | Zona `illapasystems.com` administrada en Namecheap |
-| Correo real y cron | Pendiente | |
-| Compra E2E en producción | Pendiente | |
+| Proyecto y variables Vercel | Confirmado | Implícito en la compra E2E correcta del 2 de septiembre de 2026 |
+| Dominio `openchampionship.illapa.pe` | Confirmado | Validado en Mac y iPhone el 2 de septiembre de 2026; reemplaza a `openchampionship.illapasystems.com` |
+| Correo real y cron | Parcial | Correo confirmado en la compra E2E; el cron aún no se ejecuta con Bearer |
+| Compra E2E en producción | Confirmado | Registro, comprobante, confirmación desde admin y correo con QR; Mac y iPhone, 2 de septiembre de 2026 |
 | Puerta en dos celulares | Pendiente | |
 | Aprobación para abrir ventas | Pendiente | |
 
@@ -35,7 +35,7 @@
 | Yape | 964197335 |
 | Titular | Joyce Alessandra Valdivia Paredes |
 | QR Yape | `public/yape-qr.png` |
-| Sitio | `https://openchampionship.illapasystems.com` |
+| Sitio | `https://openchampionship.illapa.pe` |
 
 Antes de continuar, escanear el QR con Yape y confirmar que muestra el número y
 titular indicados. Si no coincide, **no abrir ventas**.
@@ -84,7 +84,7 @@ Configurar para Production y Preview solo cuando corresponda. No copiar valores
 locales de Mailpit ni secretos en variables `NEXT_PUBLIC_*`.
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://openchampionship.illapasystems.com
+NEXT_PUBLIC_SITE_URL=https://openchampionship.illapa.pe
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -119,19 +119,19 @@ SESSION_SECRET=
 - [ ] Cargar las variables de la sección 4.
 - [ ] Desplegar primero en la URL temporal de Vercel.
 - [ ] Abrir `/`, `/admin/login`, `/puerta` y `/reenviar` sin errores 5xx.
-- [ ] Agregar `openchampionship.illapasystems.com` al proyecto Vercel.
+- [x] Agregar `openchampionship.illapa.pe` al proyecto Vercel.
 - [ ] Copiar desde Vercel el destino CNAME específico recomendado para el proyecto;
       no asumir un valor genérico si el panel muestra otro.
 - [ ] En Namecheap → Domain List → Manage → Advanced DNS, comprobar que no
       exista otro registro con el host `openchampionship`.
 - [ ] En Host Records crear: tipo `CNAME Record`, host `openchampionship`, valor
       exacto de Vercel y TTL `Automatic`. Namecheap agrega el dominio al host;
-      no escribir `openchampionship.illapasystems.com` en el campo Host.
+      no escribir `openchampionship.illapa.pe` en el campo Host.
 - [ ] Volver a Vercel y esperar estado de dominio válido.
 - [ ] Esperar certificado HTTPS válido.
 - [ ] Confirmar que HTTP redirige a HTTPS y que
       `NEXT_PUBLIC_SITE_URL` coincide exactamente con el dominio final.
-- [ ] Ejecutar `dig CNAME openchampionship.illapasystems.com +short` y guardar la
+- [x] Ejecutar `dig CNAME openchampionship.illapa.pe +short` y guardar la
       evidencia del destino resuelto.
 
 No emitir entradas reales mientras el dominio final no esté activo: los QR se
@@ -142,9 +142,9 @@ construyen con `NEXT_PUBLIC_SITE_URL`.
 - [ ] Confirmar `EMAIL_REPLY_TO` definitivo.
 - [ ] Si se usa Zoho, verificar alias remitente, contraseña de aplicación y TLS.
 - [ ] Si se usa Resend, confirmar dominio verificado y API key de producción.
-- [ ] Registrar una compra controlada con un correo real autorizado.
-- [ ] Confirmar correo de recepción inicial.
-- [ ] Confirmar pago desde admin y recibir el correo con todos los QR.
+- [x] Registrar una compra controlada con un correo real autorizado.
+- [x] Confirmar correo de recepción inicial.
+- [x] Confirmar pago desde admin y recibir el correo con todos los QR.
 - [ ] Verificar asunto, remitente, Reply-To, imágenes CID y enlaces HTTPS.
 - [ ] Repetir recepción en Gmail, Outlook e iCloud.
 - [ ] Ejecutar el cron con autorización Bearer correcta y confirmar auditoría.
@@ -157,12 +157,12 @@ una decisión explícita del organizador y con búsqueda/entrega manual preparad
 
 Usar una operación Yape real controlada. No usar destinatarios `example.test`.
 
-- [ ] Completar datos y cantidad en el paso 1 desde un celular.
-- [ ] Confirmar resumen, total, QR, número y titular Yape.
-- [ ] Adjuntar comprobante y código real de ocho dígitos.
-- [ ] Confirmar correo de recepción y estado `pendiente` en admin.
+- [x] Completar datos y cantidad en el paso 1 desde un celular.
+- [x] Confirmar resumen, total, QR, número y titular Yape.
+- [x] Adjuntar comprobante y código real de ocho dígitos.
+- [x] Confirmar correo de recepción y estado `pendiente` en admin.
 - [ ] Verificar comprobante mediante URL firmada.
-- [ ] Confirmar pago y releer el estado desde la base.
+- [x] Confirmar pago y releer el estado desde la base.
 - [ ] Recibir las entradas y abrir cada `/v/<token>`.
 - [ ] Confirmar que ver una entrada no la consume.
 - [ ] Reenviar entradas desde admin y mediante autoservicio.

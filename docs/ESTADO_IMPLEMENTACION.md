@@ -11,7 +11,7 @@
 | Aplicación Next.js | Scaffold creado, dependencias instaladas y build validado con Webpack. |
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. La migración 0013 inserta el evento oficial en proyectos hospedados vacíos, donde `db push` no ejecuta el seed. |
-| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. Zoho/Resend y entrega real pendientes. |
+| Correo | Providers Nodemailer/SMTP y Resend modularizados; Mailpit con QR CID validado. La entrega real en producción quedó demostrada en la compra E2E del 2 de septiembre de 2026. Falta la matriz Gmail/Outlook/iCloud que US-004 exige. |
 | Reintento de correo | US-013 diseñada y pendiente: retirar la cuota diaria artificial, conservar cron protegido como recuperación, lote técnico, claims atómicos y auditoría. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
 | Código duplicado | US-011 hecha: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. El E2E aislado confirma que queda un solo comprobante. |
@@ -20,18 +20,22 @@
 | Compra pública | US-002 hecha: compra de 3 entradas con nombres, compresión a 1600 px, Storage privado, aforo y rate limit atómicos; 4 pruebas E2E releen base y archivo. |
 | UI de compra | US-008 hecha: estética tipo ticket adaptada del proyecto Lovable, datos dinámicos de `evento` y código/monto por comprobante; revisión móvil y E2E aprobados. |
 | Compra en pasos | US-012 hecha: el arte oficial se sirve como banner responsive y el `h1` dinámico permanece oculto visualmente. El flujo móvil tiene dos pasos, resumen editable, aviso para mayores de 5 años, borrador textual, pagos múltiples y validación exacta en cliente/API/SQL. `Cancelar` fue retirado porque nada se persiste antes del registro y `Editar datos` cubre el retorno. Persona 1 hereda el comprador; el monto único es automático y solo se edita al dividir el pago. La hidratación ya no borra un borrador antes de restaurarlo. El flujo productivo fue confirmado y los 8 E2E aislados aprobaron UI, API, Storage, concurrencia y relectura local. |
+| Corte inferior en móvil | Corregido: `100vh` mide el viewport sin la barra del navegador móvil, así que el último elemento de cada vista quedaba tapado sin scroll para alcanzarlo — en compra ocultaba el enlace de reenvío. `.event-shell` y el `main` de compra usan `min-h-dvh` más un colchón con `env(safe-area-inset-bottom)`. |
+| Pie de página | `PieDePagina` con `LogoIllapa` (SVG inline, rayo amarillo del evento) en compra, gracias, reenviar y `/v/[token]`; excluido de admin y puerta. El mensaje apunta a captación de clientes nuevos, no a soporte del comprador. |
 | Sistema visual | US-009 hecha: compra, confirmación, reenvío, entrada, admin y puerta comparten tokens y componentes Bauhaus; puerta conserva feedback verde/rojo de alto contraste. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
 | Operación | US-006 implementada localmente: ajuste pagado transaccional, anulación auditable, export CSV segura y runbook; prueba presencial pendiente. |
 | Salida a producción | Runbook de producción creado con fases de Supabase, Vercel/DNS, secretos, correo, E2E, puerta, go/no-go y rollback. Ejecución pendiente. |
-| Despliegue | Supabase de producción creado y migrado; RLS anónima y bucket privado verificados. Cuenta Vercel y repositorio GitHub disponibles. Dominio decidido: `openchampionship.illapasystems.com`, administrado en Namecheap; proyecto Vercel, variables, CNAME y HTTPS pendientes. |
+| Despliegue | Supabase de producción creado y migrado; RLS anónima y bucket privado verificados. El sitio está en producción sobre `openchampionship.illapa.pe`, que reemplaza a `openchampionship.illapasystems.com`; el proyecto Vercel, las variables, el CNAME y HTTPS quedaron operativos. La compra E2E de producción se validó en Mac y iPhone el 2 de septiembre de 2026, incluido el correo con los QR. Falta la puerta en dos celulares y la aprobación para abrir ventas. |
 
 ## Siguiente paso
 
-Configurar una contraseña de aplicación de Zoho en el entorno desplegado, probar
-el alias `no-reply` y ejecutar la matriz Gmail/Outlook/iCloud. Luego ejecutar
-`docs/RUNBOOK_EVENTO.md` en el local con los dispositivos reales.
+La compra E2E de producción ya está validada en Mac y iPhone, con el correo de
+QR recibido, así que el envío real funciona sobre `openchampionship.illapa.pe`.
+Queda ejecutar la matriz Gmail/Outlook/iCloud que US-004 exige, correr el cron
+con autorización Bearer y luego `docs/RUNBOOK_EVENTO.md` en el local con los
+dispositivos reales para cerrar la puerta en dos celulares.
 
 La conformidad completa está desglosada en `docs/AUDITORIA_PRD_2026-09-01.md`.
 En la verificación de US-008 aprobaron `typecheck`, `lint`, `build` y los cuatro
