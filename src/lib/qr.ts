@@ -20,3 +20,8 @@ export function generarQrEntrada(id: string) {
     width: 480,
   });
 }
+
+export async function generarQrEntradaDataUrl(id: string) {
+  const png = await generarQrEntrada(id);
+  return `data:image/png;base64,${png.toString("base64")}`;
+}
