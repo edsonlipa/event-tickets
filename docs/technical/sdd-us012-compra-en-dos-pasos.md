@@ -1,5 +1,8 @@
 # SDD US-012 — Compra en dos pasos
 
+> Nota histórica: US-020 retiró el código de operación de este flujo. Se
+> mantienen la imagen obligatoria, los montos y la suma exacta.
+
 ## Objetivo
 
 Separar la compra pública, diseñada primero para celular, en dos pasos dentro de

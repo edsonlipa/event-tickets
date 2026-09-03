@@ -263,7 +263,7 @@ está abierta al público**.
 ### Día 3 — Mié 2 sep — Panel admin
 
 - [x] Login Supabase Auth + proxy que protege `/admin/*`, con autorización repetida en cada página/API
-- [x] Lista con filtro por estado y buscador (nombre, celular, email, código de operación)
+- [x] Lista con filtro por estado y buscador (nombre, celular, email y código histórico)
 - [x] **Hoja de contactos:** grilla de 12 comprobantes por pantalla vía signed URL, con el **monto esperado sobreimpreso** en cada miniatura. Selección múltiple + confirmar lote (§4.2 del brief)
 - [x] Detalle: comprobantes ampliados, **monto esperado vs. suma de comprobantes** con la diferencia resaltada
 - [x] `confirmar` (transacción idempotente condicionada a `status = 'pendiente'`), individual y en lote

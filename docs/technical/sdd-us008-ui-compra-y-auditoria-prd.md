@@ -1,5 +1,8 @@
 # SDD US-008 — UI de compra y auditoría de conformidad
 
+> Nota histórica: US-020 reemplazó los requisitos de código de operación. Las
+> compras nuevas exigen imagen y monto, sin solicitar código.
+
 ## Alcance
 
 - Auditar la implementación contra los requisitos y criterios de aceptación del PRD.

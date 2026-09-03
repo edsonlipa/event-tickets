@@ -17,7 +17,7 @@ dos celulares reales ni la prueba en el local.
 | Bucket privado y signed URLs | Cumple | Bucket `comprobantes` privado; el navegador sube mediante la API del servidor y admin recibe URLs de 300 s. |
 | Compra pública | Cumple en local | Validación duplicada, 1–20 entradas, nombres opcionales, monto dinámico, compresión, MIME/5 MB, aforo transaccional y rate limit persistente. E2E relee base y Storage. |
 | Datos del evento | Parcial | La UI ya lee nombre, fecha, lugar, precio y Yape desde `evento`. Los valores locales siguen provisionales y faltan QR, lugar/hora/texto definitivos del cliente. |
-| Comprobantes múltiples | Parcial | La UI y la tabla admiten N imágenes con código y monto por operación. Aún exige foto; el brief permite “foto y/o código”, pero `storage_path` es `not null`. Se requiere una decisión de producto/esquema para aceptar código sin imagen. |
+| Comprobantes múltiples | Cumple con decisión posterior | La UI y la tabla admiten N imágenes y montos. Desde US-020 cada pago exige imagen, las compras nuevas no recopilan código de operación y el administrador controla duplicados visualmente. |
 | Admin y autenticación | Cumple en local | Auth con rol repetida en páginas/APIs, lista, filtros, búsqueda, detalle, rechazo, confirmación idempotente, contadores y signed URLs. |
 | Hoja de 12 y lote | Cumple para el caso normal | Pagina 12 registros y muestra la primera imagen por compra. Una compra excepcional con varios comprobantes se revisa completa en detalle, no como N miniaturas separadas en la hoja. |
 | Edición pagada y export | Cumple en local | Aumento crea QR; reducción anula solo no usados con auditoría; export protegido neutraliza fórmulas. |

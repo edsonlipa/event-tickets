@@ -15,7 +15,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-008 | Como comprador, quiero una interfaz clara y atractiva que conserve toda la seguridad y los datos dinámicos del sistema. | P1 | Hecho | UI móvil revisada; E2E de compra, typecheck, lint y build aprobados |
 | US-009 | Como usuario, quiero una experiencia visual coherente en compra, admin y puerta para reconocer y operar el sistema con claridad. | P1 | Hecho | SDD; revisión visual móvil; typecheck, lint y build aprobados |
 | US-010 | Como comprador, quiero recibir un acuse con el detalle de mi compra para saber que fue registrada y que la confirmación llegará después. | P0 | Hecho | E2E real confirmado por el operador: ambos correos llegan correctamente |
-| US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Hecho | HTTP 409 y mensaje verificados; E2E aislado confirma un solo comprobante persistido |
+| US-011 | Como comprador, quiero entender si un código de operación ya fue usado para corregir mi envío sin ver errores internos. | P1 | Reemplazada | Antecedente histórico reemplazado por US-020 al retirar el código de operación de compras nuevas |
 | US-012 | Como comprador, quiero registrar mis datos y pagar en pasos claros para revisar el monto antes de enviar mis comprobantes. | P0 | Hecho | Flujo productivo confirmado; 8 E2E locales validan UI, API, Storage, concurrencia y relectura desde Supabase |
 | US-013 | Como operador, quiero que los correos fallidos se reintenten sin una cuota diaria artificial para recuperar entregas temporales sin duplicarlas. | P0 | En progreso | Implementación y E2E local; falta ejecutar el cron productivo con Bearer |
 | US-014 | Como operador, quiero que todas las fechas y horas usen la zona de Perú para operar correctamente sin importar la configuración del servidor, la base o el dispositivo. | P0 | Hecho | UTC/`timestamptz`; formatos `America/Lima`; unitarias multi-TZ y 21 E2E aprobados |
@@ -23,8 +23,8 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-016 | Como asistente, quiero ver el QR dentro de mi entrada pública para poder presentarlo desde el enlace. | P1 | Hecho | QR canónico visible; URL real verificada localmente sin consumir la entrada; typecheck, lint y build aprobados |
 | US-017 | Como asistente, quiero ver la fecha y hora del evento con un formato uniforme para identificar claramente cuándo asistir. | P1 | Hecho | `06 de setiembre 2026` en `es-PE` y hora de Lima; unitarias multi-TZ, typecheck, lint y build aprobados |
 | US-018 | Como admin, quiero activar explícitamente la edición de entradas y entender cuándo usarla para evitar ajustes accidentales. | P1 | Hecho | Edición en dos etapas, explicación, guardar y cancelar; 6 E2E admin, typecheck, lint y build aprobados |
-| US-019 | Como comprador rechazado, quiero recibir un correo con el motivo y el siguiente paso para corregir mi compra sin tener que preguntar. | P0 | En progreso | SDD; correo automático con marco fijo; el código de operación se libera al rechazar; typecheck, lint y build aprobados; falta aceptación real en producción |
-| US-020 | Como comprador, quiero registrar mi comprobante sin ingresar el código de operación para completar la compra con menos fricción. | P0 | Pendiente | SDD aprobado; conserva códigos históricos, búsqueda y columna nullable; nuevas compras usan imagen y monto |
+| US-019 | Como comprador rechazado, quiero recibir un correo con el motivo y el siguiente paso para corregir mi compra sin tener que preguntar. | P0 | En progreso | SDD; correo automático con marco fijo y orientación para adjuntar un comprobante claro; falta aceptación real en producción |
+| US-020 | Como comprador, quiero registrar mi comprobante sin ingresar el código de operación para completar la compra con menos fricción. | P0 | Hecho | Migración 0016; códigos históricos visibles/buscables; 22 E2E, RLS, typecheck, lint y build aprobados |
 
 ## Convenciones de estado
 
@@ -33,3 +33,5 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 - `Bloqueado`: falta una decisión, credencial o insumo externo; describirlo en
   `docs/ESTADO_IMPLEMENTACION.md`.
 - `Hecho`: cumple el criterio de aceptación y los checks aplicables.
+- `Reemplazada`: una decisión posterior retiró el comportamiento, conservando su
+  historia y documentación como antecedente.

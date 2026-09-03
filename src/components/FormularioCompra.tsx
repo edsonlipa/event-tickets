@@ -11,9 +11,9 @@ const BORRADOR_KEY = "compra:borrador:v1";
 const MAX_LADO = 1600;
 type Evento = { nombre: string; fecha: string; lugar: string | null; precioUnitario: number; yapeNumero: string; yapeTitular: string; yapeQrUrl: string | null };
 type Datos = { nombre: string; celular: string; email: string; cantidad: number; nombres: string[] };
-type Pago = { id: string; codigo: string; monto: string; archivo: File | null; preview: string | null };
+type Pago = { id: string; monto: string; archivo: File | null; preview: string | null };
 const inicio: Datos = { nombre: "", celular: "", email: "", cantidad: 1, nombres: [""] };
-const pagoNuevo = (id: string, monto = ""): Pago => ({ id, codigo: "", monto, archivo: null, preview: null });
+const pagoNuevo = (id: string, monto = ""): Pago => ({ id, monto, archivo: null, preview: null });
 const centimos = (valor: string) => Math.round(Number(valor) * 100);
 const moneda = (valor: number) => `S/ ${(valor / 100).toFixed(2)}`;
 
@@ -46,14 +46,13 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
   const total = Math.round(datos.cantidad * evento.precioUnitario * 100);
   const [pagos, setPagos] = useState<Pago[]>([pagoNuevo("pago-1", evento.precioUnitario.toFixed(2))]);
   const [error, setError] = useState("");
-  const [codigoError, setCodigoError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [imagenesPendientes, setImagenesPendientes] = useState(false);
   const [borradorListo, setBorradorListo] = useState(false);
   const suma = pagos.reduce((acum, pago) => acum + (Number.isFinite(centimos(pago.monto)) ? centimos(pago.monto) : 0), 0);
   const diferencia = total - suma;
-  const listo = pagos.every((p) => /^\d{8}$/.test(p.codigo) && p.archivo && Number(p.monto) > 0) && diferencia === 0;
+  const listo = pagos.every((p) => p.archivo && Number(p.monto) > 0) && diferencia === 0;
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -63,7 +62,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
         timer = setTimeout(() => setBorradorListo(true), 0);
         return () => { if (timer) clearTimeout(timer); };
       }
-      const draft = JSON.parse(raw) as { paso?: number; datos?: Datos; pagos?: { codigo: string; monto: string }[] };
+      const draft = JSON.parse(raw) as { paso?: number; datos?: Datos; pagos?: { monto: string }[] };
       if (!draft.datos || !Array.isArray(draft.pagos)) {
         localStorage.removeItem(BORRADOR_KEY);
         timer = setTimeout(() => setBorradorListo(true), 0);
@@ -72,7 +71,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
       const cantidad = Math.min(20, Math.max(1, Number(draft.datos.cantidad) || 1));
       timer = setTimeout(() => {
         setDatos({ ...inicio, ...draft.datos, cantidad, nombres: Array.from({ length: cantidad }, (_, i) => draft.datos?.nombres?.[i] ?? "") });
-        setPagos((draft.pagos!.length ? draft.pagos! : [{ codigo: "", monto: (cantidad * evento.precioUnitario).toFixed(2) }]).map((p, i) => ({ ...pagoNuevo(`pago-${i + 1}`), codigo: String(p.codigo).replace(/\D/g, "").slice(0, 8), monto: String(p.monto) })));
+        setPagos((draft.pagos!.length ? draft.pagos! : [{ monto: (cantidad * evento.precioUnitario).toFixed(2) }]).map((p, i) => ({ ...pagoNuevo(`pago-${i + 1}`), monto: String(p.monto) })));
         setPaso(draft.paso === 2 ? 2 : 1); setImagenesPendientes(draft.paso === 2 && draft.pagos!.length > 0); proximoPago.current = Math.max(2, draft.pagos!.length + 1);
         setBorradorListo(true);
       }, 0);
@@ -85,9 +84,9 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
 
   useEffect(() => {
     if (!borradorListo) return;
-    const vacio = paso === 1 && datos.nombre === "" && datos.celular === "" && datos.email === "" && datos.cantidad === 1 && pagos.length === 1 && pagos[0].codigo === "";
+    const vacio = paso === 1 && datos.nombre === "" && datos.celular === "" && datos.email === "" && datos.cantidad === 1 && pagos.length === 1;
     if (vacio) localStorage.removeItem(BORRADOR_KEY);
-    else localStorage.setItem(BORRADOR_KEY, JSON.stringify({ paso, datos, pagos: pagos.map(({ codigo, monto }) => ({ codigo, monto })) }));
+    else localStorage.setItem(BORRADOR_KEY, JSON.stringify({ paso, datos, pagos: pagos.map(({ monto }) => ({ monto })) }));
   }, [borradorListo, paso, datos, pagos]);
 
   useEffect(() => {
@@ -115,17 +114,17 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
     setDatos((d) => ({ ...d, cantidad: valor, nombres: Array.from({ length: valor }, (_, i) => d.nombres[i] ?? "") }));
     if (pagos.length === 1) setPagos((p) => [{ ...p[0], monto: (valor * evento.precioUnitario).toFixed(2) }]);
   }
-  function cambiarPago(id: string, cambio: Partial<Pago>) { setPagos((lista) => lista.map((p) => p.id === id ? { ...p, ...cambio } : p)); if (cambio.codigo !== undefined) setCodigoError(""); }
+  function cambiarPago(id: string, cambio: Partial<Pago>) { setPagos((lista) => lista.map((p) => p.id === id ? { ...p, ...cambio } : p)); }
   function archivo(id: string, file: File | null) { setPagos((lista) => lista.map((p) => { if (p.id !== id) return p; if (p.preview) URL.revokeObjectURL(p.preview); return { ...p, archivo: file, preview: file ? URL.createObjectURL(file) : null }; })); setImagenesPendientes(false); }
   async function copiar() { await navigator.clipboard.writeText(evento.yapeNumero); setCopiado(true); window.setTimeout(() => setCopiado(false), 1800); }
   async function enviar(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); if (!listo) return; setEnviando(true); setError(""); setCodigoError("");
+    event.preventDefault(); if (!listo) return; setEnviando(true); setError("");
     try {
       const body = new FormData(); body.set("nombrePagador", datos.nombre.trim()); body.set("celular", datos.celular.trim()); body.set("email", datos.email.trim()); body.set("cantidadPersonas", String(datos.cantidad));
       datos.nombres.forEach((n) => body.append("nombresPersonas", n.trim()));
-      for (const p of pagos) { body.append("comprobantes", await comprimir(p.archivo!)); body.append("codigosOperacion", p.codigo); body.append("montosComprobantes", p.monto); }
-      const response = await fetch("/api/registros", { method: "POST", body }); const result = await response.json() as { id?: string; error?: string; codigoOperacion?: string };
-      if (!response.ok || !result.id) { if (result.codigoOperacion) setCodigoError(result.codigoOperacion); throw new Error(result.error ?? "No pudimos registrar tu compra."); }
+      for (const p of pagos) { body.append("comprobantes", await comprimir(p.archivo!)); body.append("montosComprobantes", p.monto); }
+      const response = await fetch("/api/registros", { method: "POST", body }); const result = await response.json() as { id?: string; error?: string };
+      if (!response.ok || !result.id) throw new Error(result.error ?? "No pudimos registrar tu compra.");
       localStorage.removeItem(BORRADOR_KEY); router.push(`/gracias/${result.id}`);
     } catch (e) { setEnviando(false); setError(e instanceof Error ? e.message : "No pudimos registrar tu compra."); }
   }
@@ -142,7 +141,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
         <div className="grid gap-3 pt-2"><button className="event-button">Siguiente</button></div></form> :
       <form onSubmit={enviar} className="overflow-hidden bg-white shadow-[0_0_0_1px_rgba(28,28,28,.12)]"><section className="border-b-2 border-dashed border-ink/20 p-5"><div className="flex items-start justify-between gap-3"><div><h2 className="text-2xl font-black uppercase">Revisa tu compra</h2><p className="text-sm text-neutral-500">Confirma tus datos antes de pagar.</p></div><button type="button" onClick={() => setPaso(1)} className="text-xs font-black text-event-blue underline decoration-2 underline-offset-4">Editar datos</button></div><dl className="mt-5 grid gap-3 text-sm"><div><dt className="event-label">Comprador</dt><dd className="font-bold">{datos.nombre}</dd></div><div className="grid grid-cols-2 gap-3"><div><dt className="event-label">Celular</dt><dd className="font-bold">{datos.celular}</dd></div><div><dt className="event-label">Entradas</dt><dd className="font-bold">{datos.cantidad}</dd></div></div><div><dt className="event-label">Correo</dt><dd className="break-all font-bold">{datos.email}</dd></div>{datos.nombres.some(Boolean) && <div><dt className="event-label">Nombres asignados</dt><dd className="font-bold">{datos.nombres.filter(Boolean).join(", ")}</dd></div>}</dl></section>
         <section className="p-5"><p className="event-kicker">Paga con Yape</p><h2 className="mb-5 text-xl font-black uppercase">Sigue estos pasos</h2><div className="mb-5 grid grid-cols-[7.25rem_1fr] gap-3 border-2 border-ink/10 p-3"><div className="grid aspect-square place-items-center bg-white p-1 text-center text-[.62rem] font-bold ring-1 ring-ink/10">{evento.yapeQrUrl ? <NextImage src={evento.yapeQrUrl} alt={`QR de Yape de ${evento.yapeTitular}`} width={116} height={116} className="h-full w-full object-contain" /> : <span>QR YAPE<br />NO DISPONIBLE</span>}</div><div className="min-w-0 self-center"><span className="event-label">Número Yape</span><strong className="block break-all text-xl">{evento.yapeNumero}</strong><button type="button" onClick={copiar} className="text-xs font-black text-event-blue underline underline-offset-4">{copiado ? "Número copiado" : "Copiar número"}</button><span className="event-label mt-3">Monto exacto</span><strong className="text-2xl">{moneda(total)}</strong><p className="text-xs text-neutral-500">{evento.yapeTitular}</p></div></div>{!evento.yapeQrUrl && <p className="event-note mb-5">El QR aún no está disponible. Yapea al número mostrado.</p>}
-        <div className="space-y-4">{pagos.map((p, i) => <fieldset key={p.id} className="border-2 border-ink/10 p-4"><legend className="px-1 text-xs font-black tracking-wider uppercase">Pago {i + 1}</legend><div className="space-y-4"><Campo label="Código de operación — 8 dígitos"><input aria-label={i ? `Código de operación ${i + 1}` : "Código de operación"} value={p.codigo} onChange={(e) => cambiarPago(p.id, { codigo: e.target.value.replace(/\D/g, "").slice(0, 8) })} inputMode="numeric" maxLength={8} placeholder="00012345" className={`ticket-input ${codigoError === p.codigo ? "border-event-red" : ""}`} />{codigoError === p.codigo && <span className="mt-1 block text-xs font-bold text-event-red">El código de operación ya fue enviado.</span>}</Campo><Campo label="Monto pagado"><input aria-label={i ? `Monto pagado ${i + 1}` : "Monto pagado"} value={p.monto} onChange={(e) => cambiarPago(p.id, { monto: e.target.value })} readOnly={pagos.length === 1} inputMode="decimal" className="ticket-input read-only:text-neutral-500" /></Campo><label className="block"><span className="event-label">Comprobante</span><span onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); archivo(p.id, e.dataTransfer.files[0] ?? null); }} className="grid min-h-28 cursor-pointer grid-cols-[1fr_4.5rem] items-center gap-3 border-2 border-dashed border-ink/20 p-3"><span className="text-sm font-bold">{p.archivo ? "Reemplazar imagen" : "Toma una foto o selecciona tu archivo"}<small className="mt-1 block font-normal text-neutral-500">JPG, PNG o WebP · máx. 5 MB</small></span>{p.preview ? <img src={p.preview} alt="Vista previa del comprobante" className="h-16 w-16 object-cover" /> : <span className="grid h-16 w-16 place-items-center bg-cream text-3xl" aria-hidden>↑</span>}<input aria-label={i ? `Comprobante ${i + 1}` : "Comprobante(s)"} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" onChange={(e) => archivo(p.id, e.target.files?.[0] ?? null)} /></span></label></div>{pagos.length > 1 && <button type="button" onClick={() => { if (p.preview) URL.revokeObjectURL(p.preview); setPagos((lista) => lista.filter((item) => item.id !== p.id)); }} className="mt-3 text-xs font-black text-event-red underline underline-offset-4">Quitar pago</button>}</fieldset>)}</div>
-        <button type="button" onClick={() => setPagos((lista) => [...lista, pagoNuevo(`pago-${proximoPago.current++}`)])} className="mt-4 w-full border-2 border-dashed border-event-blue/30 py-3 text-sm font-black text-event-blue">+ Agregar otro pago <span className="font-normal">(opcional)</span></button>{imagenesPendientes && <p role="status" className="mt-4 border-l-4 border-event-yellow bg-cream p-3 text-sm">Restauramos tus datos. Por seguridad, vuelve a seleccionar cada comprobante.</p>}{diferencia !== 0 && <p role="status" className="mt-4 text-center text-sm font-bold text-event-red">{diferencia > 0 ? `Falta declarar ${moneda(diferencia)}.` : `El monto excede el total por ${moneda(Math.abs(diferencia))}.`}</p>}{error && <p role="alert" className="mt-4 bg-event-red px-3 py-2 text-sm font-semibold text-white">{error}</p>}<div className="mt-5 grid gap-3"><button disabled={enviando || !listo} className="event-button">{enviando ? "Preparando comprobantes…" : "Registrar compra"}</button></div><p className="mt-4 text-center text-xs text-neutral-500">Revisaremos tu pago y enviaremos un correo de recepción. La confirmación con tus entradas llegará después.</p></section></form>}
+        <div className="space-y-4">{pagos.map((p, i) => <fieldset key={p.id} className="border-2 border-ink/10 p-4"><legend className="px-1 text-xs font-black tracking-wider uppercase">Pago {i + 1}</legend><div className="space-y-4"><Campo label="Monto pagado"><input aria-label={i ? `Monto pagado ${i + 1}` : "Monto pagado"} value={p.monto} onChange={(e) => cambiarPago(p.id, { monto: e.target.value })} readOnly={pagos.length === 1} inputMode="decimal" className="ticket-input read-only:text-neutral-500" /></Campo><label className="block"><span className="event-label">Comprobante</span><span onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); archivo(p.id, e.dataTransfer.files[0] ?? null); }} className="grid min-h-28 cursor-pointer grid-cols-[1fr_4.5rem] items-center gap-3 border-2 border-dashed border-ink/20 p-3"><span className="text-sm font-bold">{p.archivo ? "Reemplazar imagen" : "Toma una foto o selecciona tu archivo"}<small className="mt-1 block font-normal text-neutral-500">JPG, PNG o WebP · máx. 5 MB</small></span>{p.preview ? <img src={p.preview} alt="Vista previa del comprobante" className="h-16 w-16 object-cover" /> : <span className="grid h-16 w-16 place-items-center bg-cream text-3xl" aria-hidden>↑</span>}<input aria-label={i ? `Comprobante ${i + 1}` : "Comprobante(s)"} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" onChange={(e) => archivo(p.id, e.target.files?.[0] ?? null)} /></span></label></div>{pagos.length > 1 && <button type="button" onClick={() => { if (p.preview) URL.revokeObjectURL(p.preview); setPagos((lista) => lista.filter((item) => item.id !== p.id)); }} className="mt-3 text-xs font-black text-event-red underline underline-offset-4">Quitar pago</button>}</fieldset>)}</div>
+        <button type="button" onClick={() => setPagos((lista) => [...lista, pagoNuevo(`pago-${proximoPago.current++}`)])} className="mt-4 text-xs font-semibold text-neutral-500 underline decoration-1 underline-offset-4">¿Necesitas dividir el pago?</button>{imagenesPendientes && <p role="status" className="mt-4 border-l-4 border-event-yellow bg-cream p-3 text-sm">Restauramos tus datos. Por seguridad, vuelve a seleccionar cada comprobante.</p>}{diferencia !== 0 && <p role="status" className="mt-4 text-center text-sm font-bold text-event-red">{diferencia > 0 ? `Falta declarar ${moneda(diferencia)}.` : `El monto excede el total por ${moneda(Math.abs(diferencia))}.`}</p>}{error && <p role="alert" className="mt-4 bg-event-red px-3 py-2 text-sm font-semibold text-white">{error}</p>}<div className="mt-5 grid gap-3"><button disabled={enviando || !listo} className="event-button">{enviando ? "Preparando comprobantes…" : "Registrar compra"}</button></div><p className="mt-4 text-center text-xs text-neutral-500">Revisaremos tu pago y enviaremos un correo de recepción. La confirmación con tus entradas llegará después.</p></section></form>}
     </div><a href="/reenviar" className="mt-6 block text-center text-sm font-semibold text-event-blue underline decoration-2 underline-offset-4">¿No llegó tu correo? Reenviar entradas</a></div><PieDePagina /></main>;
 }

@@ -72,7 +72,7 @@ test.beforeAll(async () => {
     const { error: comprobanteError } = await client.from("comprobantes").insert({
       registro_id: registro.id,
       storage_path: path,
-      codigo_operacion: String(10_000_000 + index),
+      codigo_operacion: registro.id === casos.ajuste.id ? null : String(10_000_000 + index),
       monto: registro.cantidad * 15,
     });
     if (comprobanteError) throw comprobanteError;
@@ -112,10 +112,12 @@ test("muestra 12 comprobantes, busca por operación y confirma un lote", async (
   const { count } = await client.from("entradas").select("id", { count: "exact", head: true }).in("registro_id", [casos.loteA.id, casos.loteB.id]);
   expect(count).toBe(5);
 
-  await page.getByPlaceholder("Nombre, celular, email u operación").fill("10000000");
+  await page.getByPlaceholder("Nombre, celular, email o código histórico").fill("10000000");
   await page.getByRole("button", { name: "Buscar" }).click();
   await expect(page.locator("article")).toHaveCount(1);
   await expect(page.getByText(casos.loteA.nombre, { exact: true })).toBeVisible();
+  await page.locator("article").getByRole("link", { name: "Ver detalle" }).click();
+  await expect(page.getByText("Operación: 10000000", { exact: false })).toBeVisible();
 });
 
 test("la confirmación concurrente es idempotente", async ({ page }) => {
@@ -133,7 +135,7 @@ test("la confirmación concurrente es idempotente", async ({ page }) => {
   expect(count).toBe(3);
 });
 
-test("rechaza con motivo y conserva la auditoría", async ({ page }) => {
+test("rechaza con motivo, conserva la auditoría y orienta sin código", async ({ page, request }) => {
   await login(page);
   await page.goto(`/admin/registros/${casos.rechazo.id}`);
   await page.getByLabel("Motivo de rechazo").fill("El monto del comprobante no coincide");
@@ -141,6 +143,17 @@ test("rechaza con motivo y conserva la auditoría", async ({ page }) => {
   await expect(page.getByText("Este registro ya está rechazado.")).toBeVisible();
   const { data } = await db().from("registros").select("status,motivo_rechazo").eq("id", casos.rechazo.id).single();
   expect(data).toMatchObject({ status: "rechazado", motivo_rechazo: "El monto del comprobante no coincide" });
+  const destinatario = `comprador-${casos.rechazo.id}@example.test`;
+  let messageId = "";
+  await expect.poll(async () => {
+    const response = await request.get("http://127.0.0.1:55424/api/v1/messages");
+    const body = await response.json() as { messages: Array<{ ID: string; To: Array<{ Address: string }> }> };
+    messageId = body.messages.find((message) => message.To.some((to) => to.Address === destinatario))?.ID ?? "";
+    return messageId;
+  }).not.toBe("");
+  const correo = await (await request.get(`http://127.0.0.1:55424/api/v1/message/${messageId}`)).json() as { HTML: string };
+  expect(correo.HTML).toContain("adjuntar un comprobante claro con los datos corregidos");
+  expect(correo.HTML).not.toContain("código de operación");
 });
 
 test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }) => {
@@ -161,6 +174,8 @@ test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }
   await client.from("entradas").update({ usado: true, usado_at: new Date().toISOString(), usado_por: "e2e" }).eq("id", usada!);
 
   await page.goto(`/admin/registros/${casos.ajuste.id}`);
+  await expect(page.getByText("Operación: sin código")).toHaveCount(0);
+  await expect(page.getByText("Monto: S/ 30.00")).toBeVisible();
   await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
   await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).not.toBeVisible();
   await page.getByRole("button", { name: "Modificar número de entradas" }).click();

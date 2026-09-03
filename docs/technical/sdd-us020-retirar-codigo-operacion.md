@@ -2,7 +2,7 @@
 
 ## Estado
 
-Diseño aprobado el 3 de septiembre de 2026. Implementación pendiente.
+Diseño aprobado e implementado localmente el 3 de septiembre de 2026.
 
 ## Historia
 

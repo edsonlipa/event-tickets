@@ -156,7 +156,7 @@ decisión explícita del organizador y con búsqueda/entrega manual preparada.
 
 ## 7. E2E de compra en producción
 
-Usar una operación Yape real controlada. No usar destinatarios `example.test`.
+Usar un pago Yape real controlado. No usar destinatarios `example.test`.
 
 - [ ] Confirmar que el evento muestra 6 de septiembre de 2026, 9:00 a. m., aun
       si el dispositivo está configurado temporalmente en otra zona horaria.
@@ -165,14 +165,14 @@ Usar una operación Yape real controlada. No usar destinatarios `example.test`.
 
 - [x] Completar datos y cantidad en el paso 1 desde un celular.
 - [x] Confirmar resumen, total, QR, número y titular Yape.
-- [x] Adjuntar comprobante y código real de ocho dígitos.
+- [x] Adjuntar la imagen del comprobante y confirmar el monto automático.
 - [x] Confirmar correo de recepción y estado `pendiente` en admin.
 - [ ] Verificar comprobante mediante URL firmada.
 - [x] Confirmar pago y releer el estado desde la base.
 - [ ] Recibir las entradas y abrir cada `/v/<token>`.
 - [ ] Confirmar que ver una entrada no la consume.
 - [ ] Reenviar entradas desde admin y mediante autoservicio.
-- [ ] Repetir el código de operación y comprobar el mensaje amigable.
+- [ ] Confirmar visualmente que el comprobante corresponde al pago y no fue reutilizado.
 - [ ] Rechazar o anular la compra controlada según decisión del organizador.
 
 ## 8. Puerta y dispositivos

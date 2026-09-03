@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { randomInt, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 const IMAGEN_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL9QAAAAABJRU5ErkJggg==",
@@ -41,7 +41,6 @@ function compraMultipart(cantidadPersonas: number) {
     celular: "999999999",
     email: `${randomUUID()}@example.test`,
     cantidadPersonas: String(cantidadPersonas),
-    codigosOperacion: String(randomInt(10_000_000, 100_000_000)),
     montosComprobantes: monto.toFixed(2),
     comprobantes: { name: "comprobante.png", mimeType: "image/png", buffer: IMAGEN_PNG },
   };
@@ -54,7 +53,6 @@ test.beforeAll(async () => {
 });
 
 test("registra tres entradas, sus nombres y un comprobante comprimido", async ({ page }) => {
-  const codigoOperacion = String(randomInt(10_000_000, 100_000_000));
   await page.setExtraHTTPHeaders({ "x-forwarded-for": `e2e-${randomUUID()}` });
   await page.goto("/");
   await expect(page.locator("h1")).toHaveText("II OPEN CHAMPIONSHIP");
@@ -69,8 +67,9 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
   await page.getByRole("button", { name: "Siguiente" }).click();
   await expect(page.getByText("Paso 2 de 2 — Pago")).toBeVisible();
   await expect(page.getByRole("img", { name: /QR de Yape/i })).toBeVisible();
-  await page.getByLabel("Código de operación").fill(codigoOperacion);
+  await expect(page.getByLabel(/Código de operación/i)).toHaveCount(0);
   await expect(page.getByLabel("Monto pagado")).toHaveValue("45.00");
+  await expect(page.getByRole("button", { name: "Registrar compra" })).toBeDisabled();
 
   const dataUrl = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -124,7 +123,7 @@ test("registra tres entradas, sus nombres y un comprobante comprimido", async ({
     .select("storage_path,codigo_operacion,monto")
     .eq("registro_id", body.id)
     .single();
-  expect(comprobante).toMatchObject({ codigo_operacion: codigoOperacion, monto: 45 });
+  expect(comprobante).toMatchObject({ codigo_operacion: null, monto: 45 });
   const { data: archivo, error: descargaError } = await client.storage
     .from("comprobantes")
     .download(comprobante!.storage_path);
@@ -150,7 +149,6 @@ test("restaura el borrador sin conservar imágenes", async ({ page }) => {
   await page.getByLabel("Celular").fill("999999999");
   await page.getByLabel("Correo").fill("borrador@example.test");
   await page.getByRole("button", { name: "Siguiente" }).click();
-  await page.getByLabel("Código de operación").fill("12345678");
   await page.reload();
   await expect(page.getByText("Paso 2 de 2 — Pago")).toBeVisible();
   await expect(page.getByText(/vuelve a seleccionar cada comprobante/i)).toBeVisible();
@@ -168,9 +166,19 @@ test("el monto es automático con un pago y editable al dividirlo", async ({ pag
   await page.getByRole("button", { name: "Siguiente" }).click();
   await expect(page.getByLabel("Monto pagado", { exact: true })).toHaveValue("15.00");
   await expect(page.getByLabel("Monto pagado", { exact: true })).toHaveAttribute("readonly", "");
-  await page.getByRole("button", { name: /Agregar otro pago/i }).click();
+  const dividir = page.getByRole("button", { name: "¿Necesitas dividir el pago?" });
+  await expect(dividir).toHaveClass(/text-neutral-500/);
+  await dividir.click();
   await expect(page.getByLabel("Monto pagado", { exact: true })).not.toHaveAttribute("readonly", "");
   await expect(page.getByLabel("Monto pagado 2")).not.toHaveAttribute("readonly", "");
+  await page.getByLabel("Monto pagado", { exact: true }).fill("10.00");
+  await page.getByLabel("Monto pagado 2").fill("5.00");
+  await page.getByLabel("Comprobante(s)").setInputFiles({
+    name: "primer-pago.png",
+    mimeType: "image/png",
+    buffer: IMAGEN_PNG,
+  });
+  await expect(page.getByRole("button", { name: "Registrar compra" })).toBeDisabled();
 });
 
 test("rechaza en servidor una suma distinta al total", async ({ request }) => {
@@ -182,23 +190,16 @@ test("rechaza en servidor una suma distinta al total", async ({ request }) => {
   await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining("coincidir exactamente") });
 });
 
-test("explica cuando el código de operación ya fue enviado", async ({ request }) => {
-  const codigo = String(randomInt(10_000_000, 100_000_000));
-  const primera = await request.post("/api/registros", {
+test("acepta formularios antiguos pero ignora su código de operación", async ({ request }) => {
+  const codigo = "87654321";
+  const response = await request.post("/api/registros", {
     headers: { "x-forwarded-for": `e2e-${randomUUID()}` },
     multipart: { ...compraMultipart(1), codigosOperacion: codigo, montosComprobantes: "15" },
   });
-  expect(primera.status()).toBe(201);
-
-  const segunda = await request.post("/api/registros", {
-    headers: { "x-forwarded-for": `e2e-${randomUUID()}` },
-    multipart: { ...compraMultipart(1), codigosOperacion: codigo, montosComprobantes: "15" },
-  });
-  expect(segunda.status()).toBe(409);
-  await expect(segunda.json()).resolves.toEqual({ error: "El código de operación ya fue enviado.", codigoOperacion: codigo });
-
-  const { count } = await db().from("comprobantes").select("id", { count: "exact", head: true }).eq("codigo_operacion", codigo);
-  expect(count).toBe(1);
+  expect(response.status()).toBe(201);
+  const body = await response.json() as { id: string };
+  const { data } = await db().from("comprobantes").select("codigo_operacion").eq("registro_id", body.id).single();
+  expect(data?.codigo_operacion).toBeNull();
 });
 
 test("serializa compras concurrentes para no superar el aforo", async ({ request }) => {

@@ -100,12 +100,14 @@ Formulario con:
   a la que corresponde
 - Muestra el QR/número Yape del organizador y el **monto exacto a pagar**
   (`cantidad × precio_unitario`)
-- Subida de **uno o más comprobantes** (foto y/o código de operación)
+- Subida de **uno o más comprobantes**; cada pago exige imagen y monto
 
 **Múltiples operaciones de Yape.** Si el monto total supera el tope por operación
 de Yape, el comprador paga en varias transferencias. El formulario debe permitir
-adjuntar **N comprobantes** a una misma compra, cada uno con su propio código de
-operación y monto. El admin valida que la suma cubra el monto esperado.
+adjuntar **N comprobantes** a una misma compra, cada uno con su propia imagen y
+monto. El admin valida que la suma cubra el monto esperado. Por decisión del
+cliente del 3/09/2026, las compras nuevas no solicitan código de operación; la
+reutilización del mismo comprobante se controla mediante revisión visual manual.
 
 **Control de aforo.** Antes de aceptar el registro se valida contra
 `evento.aforo_maximo`. El conteo incluye entradas ya emitidas **más** las de
@@ -132,7 +134,7 @@ Panel protegido con login (Supabase Auth). Lista de registros con:
 - **Monto esperado** (`cantidad_personas × precio_unitario`) mostrado junto a los
   comprobantes, para no aceptar pagos incompletos
 - Comprobantes subidos (vía signed URL de corta duración, ver §6.2)
-- Buscador por nombre, celular, email o código de operación
+- Buscador por nombre, celular, email o código histórico
 - Botón **"Confirmar pago"** y botón **"Rechazar"** (con motivo) por registro pendiente
 
 Al confirmar:
@@ -414,10 +416,8 @@ create table comprobantes (
   created_at        timestamptz not null default now()
 );
 
--- Defensa barata contra confirmar dos veces el mismo comprobante.
-create unique index comprobantes_codigo_operacion_uniq
-  on comprobantes (codigo_operacion)
-  where codigo_operacion is not null;
+-- Dato histórico nullable. Las compras nuevas siempre guardan null.
+-- La columna se conserva para soporte y auditoría de registros anteriores.
 
 create index on comprobantes (registro_id);
 
@@ -574,8 +574,9 @@ operativa y no de software: pasar a Yape Negocio. No se construye nada al respec
 
 ### 7.6 Idempotencia y duplicados
 
-- Índice único parcial en `comprobantes.codigo_operacion` (§5): el mismo código de
-  Yape no se puede registrar dos veces.
+- Las compras nuevas no recopilan código de operación. El administrador detecta
+  comprobantes reutilizados durante la revisión visual; es un riesgo aceptado por
+  el cliente.
 - La confirmación de pago debe ser idempotente: si el admin hace doble clic, no se
   generan 2N entradas. Generar dentro de una transacción condicionada a
   `status = 'pendiente'`.
@@ -716,7 +717,7 @@ primero que se sacrifica si algo se atrasa.
 | El cliente asume linterna en iPhone | Media | Confirmar dispositivo con el cliente **antes** del día 5; el botón degrada solo |
 | Compra grande supera el tope de Yape y el comprador se traba | Media | Múltiples comprobantes por registro (§4.1) + mostrar el monto exacto y advertir del tope en el formulario |
 | Admin confirma pago sin validar monto completo | Media | Monto esperado y suma de comprobantes junto a las fotos (§7.3) |
-| Mismo comprobante usado en dos registros | Baja | Índice único en `codigo_operacion` (§7.6) |
+| Mismo comprobante usado en dos registros | Media | Revisión visual manual antes de confirmar; riesgo aceptado al retirar el código de operación (§7.6) |
 | Sobreventa por encima del aforo | Baja | Validación de aforo con reserva blanda de pendientes (§4.1) |
 | Spam en el formulario público llena BD y Storage | Baja | Rate limit por IP + límite de tamaño/MIME |
 | El organizador no da abasto revisando ~250 comprobantes | Media | Hoja de contactos con confirmación en lote (§4.2) + regla de confirmar a diario |

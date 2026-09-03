@@ -1,5 +1,8 @@
 # SDD US-001 — Entorno local y cimientos de datos
 
+> Nota histórica: US-020 retiró el código de operación de las compras nuevas;
+> la columna nullable se conserva únicamente para registros anteriores.
+
 ## Alcance
 
 Crear una aplicación Next.js reproducible, ejecutar Supabase local mediante la
