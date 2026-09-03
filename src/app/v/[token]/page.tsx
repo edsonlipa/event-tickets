@@ -3,7 +3,7 @@ import Image from "next/image";
 import { PieDePagina } from "@/components/PieDePagina";
 import { getDb } from "@/lib/db";
 import { formatearFecha, formatearHora } from "@/lib/fecha";
-import { generarQrEntradaDataUrl } from "@/lib/qr";
+import { generarEntradaArteDataUrl } from "@/lib/qr";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export default async function EntradaPage({ params }: { params: Promise<{ token:
 
   const estado = entrada.anulada ? "Entrada anulada" : entrada.usado ? "Entrada ya utilizada" : "Entrada registrada";
   const colorEstado = entrada.anulada || entrada.usado ? "bg-event-red text-white" : "bg-event-yellow text-ink";
-  const qrDataUrl = await generarQrEntradaDataUrl(entrada.id);
+  const arteDataUrl = await generarEntradaArteDataUrl(entrada.id);
 
   return (
     <main className="event-shell grid place-items-center text-center">
@@ -42,8 +42,8 @@ export default async function EntradaPage({ params }: { params: Promise<{ token:
           </dl>
         </header>
         <div className="border-t-2 border-dashed border-ink/20 p-6">
-          <div className="mx-auto mb-5 w-fit border-2 border-ink bg-white p-3">
-            <Image src={qrDataUrl} alt={`QR de la entrada de ${entrada.nombre_persona || "Entrada general"}`} width={240} height={240} priority className="h-auto w-60" />
+          <div className="mx-auto mb-5 w-full max-w-[18rem] border-2 border-ink bg-white p-3">
+            <Image src={arteDataUrl} alt={`Entrada de ${entrada.nombre_persona || "Entrada general"}`} width={621} height={1080} priority unoptimized className="h-auto w-full" />
           </div>
           <p className={`p-4 font-black uppercase ${colorEstado}`}>{estado}</p>
           <p className="mt-5 text-sm text-neutral-500">Esta página es informativa. El personal de puerta validará el QR.</p>

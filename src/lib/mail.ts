@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 import { getEmailSendingProvider } from "@/lib/email/provider";
 import type { EmailMessage } from "@/lib/email/types";
 import { formatearFechaHora } from "@/lib/fecha";
-import { generarQrEntrada, urlEntrada } from "@/lib/qr";
+import { generarEntradaArte, urlEntrada } from "@/lib/qr";
 
 type ResultadoEnvio = { estado: "enviado" | "fallido" | "omitido"; error?: string };
 
@@ -118,12 +118,12 @@ async function armarCorreo(registroId: string) {
   const { from, replyTo } = configuracionRemitente();
   const qrs = await Promise.all(entradas.map(async (entrada, index) => ({
     filename: `entrada-${index + 1}.png`,
-    content: await generarQrEntrada(entrada.id),
+    content: await generarEntradaArte(entrada.id),
     cid: `entrada-${entrada.id}@illapasystems.com`,
     nombre: entrada.nombre_persona || `Entrada ${index + 1}`,
     url: urlEntrada(entrada.id),
   })));
-  const tarjetas = qrs.map((qr) => `<div style="margin:20px 0;padding:20px;border:1px solid #ddd;border-radius:12px;text-align:center"><h2>${escapar(qr.nombre)}</h2><img src="cid:${qr.cid}" width="240" height="240" alt="QR de ${escapar(qr.nombre)}"><p><a href="${escapar(qr.url)}">Abrir entrada</a></p></div>`).join("");
+  const tarjetas = qrs.map((qr) => `<div style="margin:24px 0;text-align:center"><h2 style="margin:0 0 12px;font-size:18px">${escapar(qr.nombre)}</h2><img src="cid:${qr.cid}" width="311" height="540" style="width:311px;max-width:100%;height:auto;display:block;margin:0 auto" alt="Entrada de ${escapar(qr.nombre)}"><p style="margin:12px 0 0"><a href="${escapar(qr.url)}">Abrir entrada</a></p></div>`).join("");
   return {
     to: registro.email,
     from,
