@@ -22,7 +22,7 @@ dos celulares reales ni la prueba en el local.
 | Hoja de 12 y lote | Cumple para el caso normal | Pagina 12 registros y muestra la primera imagen por compra. Una compra excepcional con varios comprobantes se revisa completa en detalle, no como N miniaturas separadas en la hoja. |
 | Edición pagada y export | Cumple en local | Aumento crea QR; reducción anula solo no usados con auditoría; export protegido neutraliza fórmulas. |
 | QR y landing `/v` | Cumple en local | UUID aleatorio, URL con prefijo del sitio, PNG backend/CID y landing informativa que no consume. |
-| Correo modular y cola | Parcial / bloqueo externo | Nodemailer y Resend comparten composición/cola; fallo no revierte pago; cron, cuota, reenvío admin y autoservicio genérico están probados con Mailpit. Falta entrega real en Gmail, Outlook e iCloud y credencial Zoho/Resend. |
+| Correo modular y cola | Cumple con excepción de producto | Nodemailer y Resend comparten composición/cola; un fallo no revierte el pago; cron sin cuota artificial, reenvío admin y autoservicio genérico se prueban con Mailpit. Zoho real fue validado en Gmail y Outlook; producto excluyó iCloud. |
 | PIN y sesión de puerta | Cumple en local | Cookie firmada `httpOnly`, rate limit persistente progresivo y APIs protegidas. La expiración definitiva depende de la hora real del evento. |
 | Escaneo y consumo atómico | Parcial / bloqueo externo | BarcodeDetector + ZXing, torch condicional, Wake Lock, cuatro resultados y RPC atómica probados. Falta la aceptación simultánea en dos dispositivos reales. |
 | Offline y PWA | Parcial / bloqueo externo | Precarga mínima, cola idempotente, búsqueda degradada, manifest y service worker pasan E2E. Falta modo avión, instalación y cámara en los celulares definitivos. |

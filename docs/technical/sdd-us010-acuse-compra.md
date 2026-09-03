@@ -17,7 +17,7 @@ recibirá un segundo correo cuando el administrador confirme el pago.
 ## Datos
 
 `registros` agrega estado, fecha, error y claim propios para el acuse. `email_envios`
-agrega `tipo` (`registro_recibido` o `entradas`) para auditoría y cuota compartida.
+agrega `tipo` (`registro_recibido` o `entradas`) para auditoría compartida.
 El correo muestra nombre del evento, comprador, cantidad, precio unitario, monto
 total, fecha, lugar y código de registro; no adjunta comprobantes ni PII adicional.
 
@@ -26,7 +26,7 @@ total, fecha, lugar y código de registro; no adjunta comprobantes ni PII adicio
 - La plantilla y el transporte permanecen en módulos `server-only`.
 - Un fallo de correo nunca elimina ni revierte la compra.
 - Los errores se normalizan sin credenciales.
-- El cron comparte el límite diario y su autenticación existente.
+- El cron comparte la autenticación y el lote técnico definidos por US-013.
 
 ## Verificación
 

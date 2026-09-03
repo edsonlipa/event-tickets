@@ -92,7 +92,6 @@ SUPABASE_SERVICE_ROLE_KEY=
 EMAIL_SENDING_PROVIDER=
 EMAIL_FROM="Entradas <no-reply@illapasystems.com>"
 EMAIL_REPLY_TO=
-EMAIL_SEND_LIMIT=100
 
 SMTP_HOST=
 SMTP_PORT=465
@@ -148,10 +147,12 @@ construyen con `NEXT_PUBLIC_SITE_URL`.
 - [x] Verificar asunto, remitente, Reply-To, imágenes CID y enlaces HTTPS.
 - [x] Repetir recepción en Gmail y Outlook. iCloud fue excluido por decisión del producto; Outlook llegó a no deseado y el riesgo fue aceptado.
 - [ ] Ejecutar el cron con autorización Bearer correcta y confirmar auditoría.
+- [ ] Confirmar que la respuesta incluye `procesados`, `enviados`, `fallidos` y
+      `pendientesRestantes`, sin direcciones ni errores del proveedor.
 - [ ] Confirmar que un fallo de correo no revierte el estado del pago.
 
-Si el correo no llega a los tres proveedores, las ventas pueden abrirse solo con
-una decisión explícita del organizador y con búsqueda/entrega manual preparada.
+Si el correo no llega a la matriz aprobada, las ventas pueden abrirse solo con una
+decisión explícita del organizador y con búsqueda/entrega manual preparada.
 
 ## 7. E2E de compra en producción
 

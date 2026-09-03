@@ -68,7 +68,8 @@ quedan pendientes, una ejecución posterior continúa la cola.
 5. El cron sin Bearer válido responde HTTP 401.
 6. Cada intento exitoso o fallido queda registrado en `email_envios`.
 7. `typecheck`, `lint`, `build` y E2E de correo quedan aprobados.
-8. Gmail, Outlook e iCloud reciben los dos tipos de correo en producción.
+8. La matriz de entrega real aprobada por producto conserva la aceptación de
+   US-004/US-007: Gmail y Outlook; iCloud permanece excluido explícitamente.
 
 ## Plan de verificación
 

@@ -56,11 +56,11 @@ Mailpit con los QR bajo `Inline`, un `Content-ID` por entrada y el `Reply-To`
 configurado. El cron local requiere `CRON_SECRET`; en Vercel se ejecuta diariamente
 a las 14:00 UTC (09:00 en Lima) según `vercel.json`.
 
-Las variables comunes de producción son `EMAIL_FROM`, `EMAIL_REPLY_TO`,
-`EMAIL_SEND_LIMIT` y `CRON_SECRET`. Con Resend se selecciona `resend` y se define
+Las variables comunes de producción son `EMAIL_FROM`, `EMAIL_REPLY_TO` y
+`CRON_SECRET`. Con Resend se selecciona `resend` y se define
 `RESEND_API_KEY`. Con Zoho se selecciona `nodemailer` y se configuran los campos
 SMTP descritos abajo. La historia no se considera terminada hasta comprobar
-recepción y QR visibles en Gmail, Outlook e iCloud.
+recepción y QR visibles en la matriz de proveedores aprobada por producto.
 
 ### Zoho SMTP
 

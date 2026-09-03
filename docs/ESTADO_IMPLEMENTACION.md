@@ -12,7 +12,7 @@
 | Supabase local | Operativo y aislado en los puertos 55420–55429. |
 | Base de datos y RLS | Esquema inicial, bucket privado y RLS deny-all verificados localmente. La migración 0013 inserta el evento oficial en proyectos hospedados vacíos, donde `db push` no ejecuta el seed. |
 | Correo | US-004 y US-007 hechas: QR real recibido en Gmail; Zoho entrega en Outlook con SPF, DKIM y DMARC. Producto excluyó iCloud y aceptó monitorear la clasificación inicial de Outlook como no deseado. |
-| Reintento de correo | US-013 diseñada y pendiente: retirar la cuota diaria artificial, conservar cron protegido como recuperación, lote técnico, claims atómicos y auditoría. |
+| Reintento de correo | US-013 en progreso: se retiró la cuota diaria artificial y se conserva cron protegido, lote técnico de 50, prioridad de acuses, claims atómicos y auditoría. Falta validar el cron desplegado con Bearer. |
 | Zona horaria | US-014 diseñada y pendiente: asegurar almacenamiento en `timestamptz`, presentación y días civiles en `America/Lima`, con pruebas independientes de la zona del servidor y del dispositivo. |
 | Feedback de puerta | US-015 diseñada y pendiente: mostrar nombre y hora autoritativa de ingreso en `PASA` y en `NO PASA` por entrada ya utilizada, sin inventar hora para anuladas o inexistentes. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |

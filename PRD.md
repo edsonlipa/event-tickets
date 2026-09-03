@@ -42,7 +42,7 @@ el runbook, no el desarrollo.
 | Dominio web | **`openchampionship.illapasystems.com`** → CNAME administrado en Namecheap hacia Vercel |
 | Dominio de envío | **`illapasystems.com`** — **ya verificado en Resend** |
 | Remitente | `no-reply@illapasystems.com` + `Reply-To` al cliente |
-| Plan de correo | **Resend gratuito**, 100/día, con cola de reintento |
+| Plan de correo | **Zoho SMTP** en producción, con cola de recuperación y proveedor intercambiable |
 
 ---
 
@@ -135,7 +135,7 @@ impide que la `service_role key` termine en un bundle de cliente por accidente.
 | `GET` | `/api/puerta/precarga` | Guardia | Lista mínima para offline |
 | `GET` | `/api/puerta/buscar?q=` | Guardia | Búsqueda manual. **PII minimizada** |
 | `POST` | `/api/puerta/marcar` | Guardia | Update atómico (§7.1). Acepta lote para la cola offline |
-| `GET` | `/api/cron/correos-pendientes` | Cron | Drena `email_enviado = false` contra la cuota del día. Protegido por `CRON_SECRET` |
+| `GET` | `/api/cron/correos-pendientes` | Cron | Recupera acuses y entradas pendientes en un lote técnico. Protegido por `CRON_SECRET` |
 
 ### 3.3 Forma de las respuestas del escáner
 
@@ -167,8 +167,6 @@ SUPABASE_SERVICE_ROLE_KEY=          # server-only, nunca NEXT_PUBLIC_
 EMAIL_SENDING_PROVIDER=              # nodemailer | resend
 EMAIL_FROM="Entradas <no-reply@illapasystems.com>"
 EMAIL_REPLY_TO=admin@illapasystems.com
-EMAIL_SEND_LIMIT=100
-
 # Nodemailer SMTP (Mailpit local o Zoho en producción)
 SMTP_HOST=
 SMTP_PORT=465
@@ -267,7 +265,6 @@ está abierta al público**.
 - [x] Login Supabase Auth + proxy que protege `/admin/*`, con autorización repetida en cada página/API
 - [x] Lista con filtro por estado y buscador (nombre, celular, email, código de operación)
 - [x] **Hoja de contactos:** grilla de 12 comprobantes por pantalla vía signed URL, con el **monto esperado sobreimpreso** en cada miniatura. Selección múltiple + confirmar lote (§4.2 del brief)
-- [x] Contador de cuota de correo consumida hoy, visible en la cabecera
 - [x] Detalle: comprobantes ampliados, **monto esperado vs. suma de comprobantes** con la diferencia resaltada
 - [x] `confirmar` (transacción idempotente condicionada a `status = 'pendiente'`), individual y en lote
 - [x] `rechazar` con motivo

@@ -33,7 +33,7 @@ Revisión técnica del brief original. Lo que cambió y por qué:
 | 12 | **Escáner: `@zxing/browser` + `BarcodeDetector`** (§8) | `html5-qrcode` está sin mantenimiento activo |
 | 13 | **Capa PWA en la vista guardia; app nativa descartada** (§4.6) | El único beneficio real de React Native sobre el navegador es la linterna en iPhone, y su distribución repite el riesgo de afiliación con un tercero que ya se rechazó en §3 |
 | 14 | **Revisión de pagos en hoja de contactos** (§4.2) | Con 200–300 asistentes a S/15 son ~200–250 comprobantes a revisar a mano, en oleada los últimos días. Confirmar de uno en uno no escala |
-| 15 | **Cola de reintento de correo con cron** (§4.3) | v1 dejaba `email_enviado`/`email_error` como campos sin proceso que los consumiera. El cron cierra el diseño y absorbe cualquier fallo de envío, incluida la cuota diaria |
+| 15 | **Cola de reintento de correo con cron** (§4.3) | v1 dejaba `email_enviado`/`email_error` como campos sin proceso que los consumiera. El cron cierra el diseño y recupera cualquier fallo transitorio sin convertir la cola en el camino principal |
 | 16 | **Proveedor de correo intercambiable** (§4.3) | Se conserva Resend y se agrega Nodemailer/SMTP para Zoho sin acoplar plantilla, QR ni cola al transporte |
 
 ---
@@ -219,24 +219,23 @@ negro justo cuando más importan. Además, el correo de contacto va **visible en
 cuerpo** del mensaje, no solo en la cabecera: mucha gente no usa "Responder", busca
 una dirección para escribir o reenviar.
 
-**Cuota y cola de reintento.** Resend gratuito conserva su tope configurado de
-100 correos/día. Zoho aplica su propia política SMTP; el límite operativo se
-configura sin cambiar la cola. El total necesario es ~250–350 correos en 7 días:
-el riesgo principal son las ráfagas si el organizador acumula confirmaciones.
+**Cola de reintento.** El proveedor contratado no requiere que la aplicación
+imponga una cuota diaria artificial. El cron se conserva como recuperación ante
+fallos transitorios y procesa un lote técnico fijo por ejecución para acotar la
+duración y el uso de memoria.
 
 Se cubre completando el diseño que ya está en el modelo de datos:
 
 - Los campos `email_enviado`, `email_enviado_at` y `email_error` existen desde v1
   para desacoplar pago y correo. Faltaba el proceso que los consuma.
-- Si un envío falla —por cuota, caída del proveedor o dirección inválida— el
+- Si un envío falla —por caída del proveedor o dirección inválida— el
   registro queda `pagado` con `email_enviado = false` y el error guardado. **El pago
   nunca se bloquea.**
-- Un **cron diario** (Vercel Cron, gratuito) barre los pendientes de envío y los
-  drena contra la cuota del día.
-- La hoja de contactos muestra el contador de cuota consumida hoy.
+- Un **cron diario** (Vercel Cron) barre los pendientes de envío y procesa primero
+  acuses y después entradas, con claims atómicos y un máximo técnico por ejecución.
 
-Esto no es un parche contra el límite de Resend: deja el sistema robusto ante
-cualquier fallo de correo, que ya era un riesgo listado en §12.
+La cola deja el sistema robusto ante cualquier fallo de correo sin retrasar los
+envíos exitosos, que continúan ocurriendo inmediatamente.
 
 **Autoservicio:** página pública donde el comprador ingresa su email para
 reenviarse las entradas sin depender del admin. Con rate limit por email/IP
@@ -392,7 +391,7 @@ create table registros (
   created_at        timestamptz not null default now()
 );
 
--- Auditoría y conteo real de cuota; incluye reenvíos.
+-- Auditoría de intentos; incluye reenvíos.
 create table email_envios (
   id                bigserial primary key,
   registro_id       uuid not null references registros(id) on delete cascade,
@@ -721,5 +720,5 @@ primero que se sacrifica si algo se atrasa.
 | Sobreventa por encima del aforo | Baja | Validación de aforo con reserva blanda de pendientes (§4.1) |
 | Spam en el formulario público llena BD y Storage | Baja | Rate limit por IP + límite de tamaño/MIME |
 | El organizador no da abasto revisando ~250 comprobantes | Media | Hoja de contactos con confirmación en lote (§4.2) + regla de confirmar a diario |
-| La cuota diaria de Resend corta envíos en la oleada final | Media | Cola de reintento con cron: el pago no se bloquea y el correo se drena al día siguiente (§4.3). La búsqueda manual en la puerta cubre el resto |
+| Una falla transitoria del proveedor deja correos pendientes | Media | Cola de reintento con cron y claims atómicos; el pago no se bloquea y la búsqueda manual en puerta cubre contingencias (§4.3) |
 | El guardia con iPhone no encuentra cómo instalar la PWA | Baja | El link sin instalar funciona igual; mostrar el gesto en la prueba del día 6 |

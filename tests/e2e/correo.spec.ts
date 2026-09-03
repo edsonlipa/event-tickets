@@ -94,7 +94,7 @@ test("confirma, envía N QR por CID y la landing no consume la entrada", async (
   expect(despues).toMatchObject({ usado: false, usado_at: null });
 });
 
-test("un fallo conserva el pago y el cron respeta cuota y reintenta", async ({ page, request }) => {
+test("un fallo conserva el pago y dos cron concurrentes reintentan sin duplicar", async ({ page, request }) => {
   await login(page);
   const confirmacion = await page.evaluate(async (id) => {
     const response = await fetch(`/api/admin/registros/${id}/confirmar`, { method: "POST" });
@@ -110,17 +110,25 @@ test("un fallo conserva el pago y el cron respeta cuota y reintenta", async ({ p
 
   expect((await request.get("/api/cron/correos-pendientes")).status()).toBe(401);
   const hoy = new Date().toISOString();
-  await client.from("email_envios").insert(Array.from({ length: 100 }, () => ({ registro_id: falloId, exito: true, error: "cuota-e2e", created_at: hoy })));
-  const sinCuota = await request.get("/api/cron/correos-pendientes", { headers: { authorization: "Bearer cron-e2e" } });
-  expect(await sinCuota.json()).toMatchObject({ procesados: 0, disponibles: 0 });
-  await client.from("email_envios").delete().eq("error", "cuota-e2e");
+  await client.from("email_envios").insert(Array.from({ length: 100 }, () => ({ registro_id: falloId, exito: true, error: "historial-e2e", created_at: hoy })));
+  const respuestas = await Promise.all([
+    request.get("/api/cron/correos-pendientes", { headers: { authorization: "Bearer cron-e2e" } }),
+    request.get("/api/cron/correos-pendientes", { headers: { authorization: "Bearer cron-e2e" } }),
+  ]);
+  expect(respuestas.every((response) => response.status() === 200)).toBe(true);
+  const resultadosCron = await Promise.all(respuestas.map((response) => response.json() as Promise<{ procesados: number; enviados: number; fallidos: number; pendientesRestantes: boolean }>));
+  expect(resultadosCron.reduce((total, resultado) => total + resultado.enviados, 0)).toBeGreaterThanOrEqual(2);
+  expect(resultadosCron.every((resultado) => typeof resultado.pendientesRestantes === "boolean")).toBe(true);
+  await client.from("email_envios").delete().eq("error", "historial-e2e");
 
-  const reintento = await request.get("/api/cron/correos-pendientes", { headers: { authorization: "Bearer cron-e2e" } });
-  const resultadoCron = await reintento.json() as { enviados: number };
-  expect(resultadoCron.enviados).toBeGreaterThanOrEqual(1);
   const { data: enviado } = await client.from("registros").select("email_enviado,email_error").eq("id", falloId).single();
   expect(enviado).toMatchObject({ email_enviado: true, email_error: null });
   await buscarMensaje(request, reintentoEmail);
+  const mensajes = await (await request.get("http://127.0.0.1:55424/api/v1/messages")).json() as { messages: Array<{ To: Array<{ Address: string }> }> };
+  expect(mensajes.messages.filter((message) => message.To.some((to) => to.Address === reintentoEmail))).toHaveLength(2);
+  const { data: auditoria } = await client.from("email_envios").select("tipo,exito").eq("registro_id", falloId).eq("exito", true);
+  expect(auditoria?.filter((item) => item.tipo === "registro_recibido")).toHaveLength(1);
+  expect(auditoria?.filter((item) => item.tipo === "entradas")).toHaveLength(1);
 });
 
 test("reenvío admin funciona y autoservicio no enumera compradores", async ({ page, request }) => {

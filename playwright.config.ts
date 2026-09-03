@@ -25,6 +25,8 @@ export default defineConfig({
     env: {
       ...process.env,
       EMAIL_SENDING_PROVIDER: "nodemailer",
+      EMAIL_FROM: "Entradas E2E <no-reply@example.test>",
+      EMAIL_REPLY_TO: "soporte@example.test",
       SMTP_HOST: "127.0.0.1",
       SMTP_PORT: "55425",
       SMTP_SECURE: "false",

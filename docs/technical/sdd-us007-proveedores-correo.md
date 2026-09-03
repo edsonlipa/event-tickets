@@ -17,13 +17,12 @@ flujos de confirmación y reenvío. Nodemailer soportará Mailpit local y Zoho S
 
 ## Configuración
 
-- Variables neutrales: `EMAIL_FROM`, `EMAIL_REPLY_TO` y `EMAIL_SEND_LIMIT`.
+- Variables neutrales: `EMAIL_FROM` y `EMAIL_REPLY_TO`.
 - Nodemailer usa `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER` y
   `SMTP_PASS`. Desarrollo permite Mailpit sin autenticación; producción exige
   usuario y contraseña.
 - Resend conserva `RESEND_API_KEY`. Durante la transición se admiten
-  `RESEND_FROM`, `RESEND_REPLY_TO` y `RESEND_LIMITE_DIARIO` como fallback
-  documentado, sin eliminar compatibilidad.
+  `RESEND_FROM` y `RESEND_REPLY_TO` como fallback documentado.
 - La contraseña de aplicación de Zoho se configura únicamente en `.env.local`
   o en el gestor de secretos del despliegue; nunca se versiona ni se registra.
 

@@ -26,8 +26,8 @@ administrativo y autoservicio, y publicar la landing de lectura nativa del QR.
 - En éxito se fijan `email_enviado`, `email_enviado_at` y se limpia el error. En
   fallo se conserva `email_enviado = false`, se guarda `email_error` y se libera
   el claim para un reintento posterior.
-- El cron respeta `EMAIL_SEND_LIMIT`, procesa únicamente pagos pendientes de
-  correo y exige `Authorization: Bearer <CRON_SECRET>`.
+- El cron procesa un lote técnico de correos pendientes y exige
+  `Authorization: Bearer <CRON_SECRET>`; US-013 retiró la cuota diaria artificial.
 
 ## Reenvíos
 
@@ -58,7 +58,7 @@ administrativo y autoservicio, y publicar la landing de lectura nativa del QR.
 3. Forzando un fallo, el pago queda pagado con `email_error`; el cron lo envía al
    restaurar el transporte.
 4. Reenvío admin funciona y autoservicio responde igual para email existente o no.
-5. Cron sin secreto devuelve 401 y respeta la cuota diaria.
+5. Cron sin secreto devuelve 401 y limita cada ejecución por un máximo técnico.
 6. Typecheck, lint, build, E2E y RLS finalizan correctamente.
 7. La aceptación externa se cerró el 2 de septiembre de 2026 con QR real en
    Gmail y entrega en Outlook con SPF, DKIM y DMARC aprobados. El responsable
