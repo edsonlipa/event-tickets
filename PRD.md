@@ -144,8 +144,8 @@ cada uno a un color y un sonido:
 
 | `resultado` | Pantalla | Significado |
 |---|---|---|
-| `admitido` | Verde | Ganó la carrera del update. Pasa |
-| `ya_usado` | Roja | Incluye `usado_previamente_at` para mostrar la hora |
+| `admitido` | Verde | Ganó la carrera del update. Incluye nombre e `ingreso_at` |
+| `ya_usado` | Roja | Incluye el mismo nombre e `ingreso_at` del primer acceso |
 | `anulada` | Roja | Entrada invalidada por edición del admin |
 | `no_existe` | Roja | Token inválido o de otro evento |
 

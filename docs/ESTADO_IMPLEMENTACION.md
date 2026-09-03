@@ -14,7 +14,7 @@
 | Correo | US-004 y US-007 hechas: QR real recibido en Gmail; Zoho entrega en Outlook con SPF, DKIM y DMARC. Producto excluyó iCloud y aceptó monitorear la clasificación inicial de Outlook como no deseado. |
 | Reintento de correo | US-013 en progreso: se retiró la cuota diaria artificial y se conserva cron protegido, lote técnico de 50, prioridad de acuses, claims atómicos y auditoría. Falta validar el cron desplegado con Bearer. |
 | Zona horaria | US-014 hecha: almacenamiento UTC/`timestamptz`, formatos humanos y CSV en `America/Lima`; unitarias bajo tres zonas y 21 E2E con servidor en Tokio/navegador en Auckland aprobados. |
-| Feedback de puerta | US-015 diseñada y pendiente: mostrar nombre y hora autoritativa de ingreso en `PASA` y en `NO PASA` por entrada ya utilizada, sin inventar hora para anuladas o inexistentes. |
+| Feedback de puerta | US-015 implementada localmente: `PASA` y `NO PASA` muestran nombre, motivo y hora autoritativa en Perú; concurrencia, fallback de comprador, PII y offline pasan 5 E2E. Falta migración 0014 y prueba en producción. |
 | Acuse de compra | US-010 hecha: correo inmediato con resumen y aviso de confirmación posterior; estado, auditoría y reintento separados del correo con QR. E2E real confirmado por el operador. |
 | Código duplicado | US-011 hecha: el constraint de operación duplicada se traduce a HTTP 409 y “El código de operación ya fue enviado.”; limpia el archivo del intento. El E2E aislado confirma que queda un solo comprobante. |
 | Acceso LAN de puerta | Corregido: Next.js permite el origen de desarrollo `192.168.3.111`; login verifica la cookie antes de navegar. Cámara móvil continúa requiriendo HTTPS por política del navegador. |
@@ -57,6 +57,11 @@ esta suite destructiva en una ejecución remota accidental.
 US-014 centraliza `America/Lima`, conserva el ISO UTC en exportación y agrega una
 columna operativa `created_at_peru`. La suite E2E fuerza zonas diferentes para
 servidor y navegador, y los fixtures quedaron aislados del PIN y secretos reales.
+
+US-015 conserva el consumo atómico y ahora devuelve el mismo `ingreso_at` al
+primer y segundo escaneo concurrente. El reset local 0001–0014, los 5 E2E de
+puerta y la denegación de tablas/RPC a `anon` aprobaron; producción aún no tiene
+la migración 0014.
 
 US-009 se verificó visualmente en móvil para reenvío, PIN y entrada inválida, y
 mediante `build`, `typecheck` y `lint`. No se ejecutó la suite E2E en esta iteración

@@ -2,7 +2,8 @@
 
 ## Estado
 
-Pendiente de implementación y verificación.
+Implementada y verificada localmente el 2 de septiembre de 2026. Pendiente de
+aplicar la migración 0014 y validar en producción.
 
 ## Historia
 
@@ -88,3 +89,19 @@ el timestamp autoritativo del servidor.
 - Prueba de contrato de `/api/puerta/marcar` sin PII adicional.
 - Prueba de UI para `PASA` y las variantes de `NO PASA`.
 - Relectura del registro desde Supabase para comparar el timestamp mostrado.
+
+## Evidencia local
+
+- La migración `0014_feedback_ingreso_puerta.sql` conserva el update atómico y
+  devuelve `ingreso_at` tanto para `admitido` como para `ya_usado`.
+- El nombre usa `nombre_persona` y recurre a `nombre_pagador` exclusivamente en
+  el servidor; no se agregaron email, celular ni comprobantes al contrato.
+- La precarga conserva `ingresoAt` y la sincronización offline actualiza la copia
+  local con el timestamp confirmado por el servidor.
+- La UI muestra nombre, motivo y `Ingreso registrado a las h:mm a. m./p. m.` con
+  el formateador `America/Lima` de US-014. Un ingreso offline aún no sincronizado
+  se etiqueta como pendiente en vez de inventar una hora del celular.
+- Cinco E2E de puerta aprobaron autenticación, concurrencia, UI `PASA`/`NO PASA`,
+  minimización de PII y sincronización offline con navegador en otra zona horaria.
+- El reset local aplicó las migraciones 0001–0014 y la comprobación final confirmó
+  RLS deny-all y RPC denegada para `anon`.

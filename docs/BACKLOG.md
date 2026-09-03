@@ -19,7 +19,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-012 | Como comprador, quiero registrar mis datos y pagar en pasos claros para revisar el monto antes de enviar mis comprobantes. | P0 | Hecho | Flujo productivo confirmado; 8 E2E locales validan UI, API, Storage, concurrencia y relectura desde Supabase |
 | US-013 | Como operador, quiero que los correos fallidos se reintenten sin una cuota diaria artificial para recuperar entregas temporales sin duplicarlas. | P0 | En progreso | Implementación y E2E local; falta ejecutar el cron productivo con Bearer |
 | US-014 | Como operador, quiero que todas las fechas y horas usen la zona de Perú para operar correctamente sin importar la configuración del servidor, la base o el dispositivo. | P0 | Hecho | UTC/`timestamptz`; formatos `America/Lima`; unitarias multi-TZ y 21 E2E aprobados |
-| US-015 | Como guardia, quiero ver el nombre y la hora de ingreso en los resultados PASA y NO PASA para validar cada acceso con claridad. | P1 | Pendiente | SDD; timestamp autoritativo, nombre con fallback y pruebas de puerta |
+| US-015 | Como guardia, quiero ver el nombre y la hora de ingreso en los resultados PASA y NO PASA para validar cada acceso con claridad. | P1 | En progreso | Implementación, migración y 5 E2E locales aprobados; falta aplicar 0014 y validar en producción |
 
 ## Convenciones de estado
 

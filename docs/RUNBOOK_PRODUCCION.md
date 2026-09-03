@@ -184,6 +184,10 @@ Usar una operación Yape real controlada. No usar destinatarios `example.test`.
 - [ ] Confirmar pantalla verde para admitido y roja para usado/anulado.
 - [ ] Probar búsqueda sin mostrar email o celular completo.
 - [ ] Precargar, activar modo avión, escanear y sincronizar al recuperar señal.
+- [ ] Escanear un QR nuevo: comprobar `PASA`, nombre y hora peruana; releer
+      `usado_at` en Supabase y confirmar que coincide.
+- [ ] Escanear el mismo QR otra vez: comprobar `NO PASA`, nombre, “Entrada ya
+      utilizada” y exactamente la misma hora del primer ingreso.
 - [ ] Instalar la PWA o agregarla a inicio en cada dispositivo operativo.
 
 La aceptación detallada continúa en [RUNBOOK_EVENTO.md](./RUNBOOK_EVENTO.md).
