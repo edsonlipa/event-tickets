@@ -9,6 +9,21 @@ import { PieDePagina } from "@/components/PieDePagina";
 
 const sinSuscripcion = () => () => {};
 const BORRADOR_KEY = "compra:borrador:v1";
+
+// El navegador puede rechazar el almacenamiento por cuota o por bloqueo del
+// usuario (Safari con "Bloquear todas las cookies", modo privado, políticas de
+// empresa). El borrador es una comodidad, no parte de la compra: si no se puede
+// guardar, la compra debe seguir. Incluso el `catch` del efecto de lectura
+// necesita esta tolerancia, porque ahí `removeItem` vuelve a lanzar.
+function leerBorrador() {
+  try { return localStorage.getItem(BORRADOR_KEY); } catch { return null; }
+}
+function guardarBorrador(valor: string) {
+  try { localStorage.setItem(BORRADOR_KEY, valor); } catch { /* se sigue sin borrador */ }
+}
+function olvidarBorrador() {
+  try { localStorage.removeItem(BORRADOR_KEY); } catch { /* se sigue sin borrador */ }
+}
 const MAX_LADO = 1600;
 type Evento = { nombre: string; fecha: string; lugar: string | null; precioUnitario: number; yapeNumero: string; yapeTitular: string; yapeQrUrl: string | null };
 type Datos = { nombre: string; celular: string; email: string; cantidad: number; nombres: string[] };
@@ -64,14 +79,14 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const raw = localStorage.getItem(BORRADOR_KEY);
+      const raw = leerBorrador();
       if (!raw) {
         timer = setTimeout(() => setBorradorListo(true), 0);
         return () => { if (timer) clearTimeout(timer); };
       }
       const draft = JSON.parse(raw) as { paso?: number; datos?: Datos; pagos?: { monto: string }[] };
       if (!draft.datos || !Array.isArray(draft.pagos)) {
-        localStorage.removeItem(BORRADOR_KEY);
+        olvidarBorrador();
         timer = setTimeout(() => setBorradorListo(true), 0);
         return () => { if (timer) clearTimeout(timer); };
       }
@@ -83,7 +98,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
         setBorradorListo(true);
       }, 0);
     } catch {
-      localStorage.removeItem(BORRADOR_KEY);
+      olvidarBorrador();
       timer = setTimeout(() => setBorradorListo(true), 0);
     }
     return () => { if (timer) clearTimeout(timer); };
@@ -92,8 +107,8 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
   useEffect(() => {
     if (!borradorListo) return;
     const vacio = paso === 1 && datos.nombre === "" && datos.celular === "" && datos.email === "" && datos.cantidad === 1 && pagos.length === 1;
-    if (vacio) localStorage.removeItem(BORRADOR_KEY);
-    else localStorage.setItem(BORRADOR_KEY, JSON.stringify({ paso, datos, pagos: pagos.map(({ monto }) => ({ monto })) }));
+    if (vacio) olvidarBorrador();
+    else guardarBorrador(JSON.stringify({ paso, datos, pagos: pagos.map(({ monto }) => ({ monto })) }));
   }, [borradorListo, paso, datos, pagos]);
 
   useEffect(() => {
@@ -157,7 +172,7 @@ export function FormularioCompra({ evento }: { evento: Evento }) {
       for (const p of pagos) { body.append("comprobantes", await comprimir(p.archivo!)); body.append("montosComprobantes", p.monto); }
       const response = await fetch("/api/registros", { method: "POST", body }); const result = await response.json() as { id?: string; error?: string };
       if (!response.ok || !result.id) throw new Error(result.error ?? "No pudimos registrar tu compra.");
-      localStorage.removeItem(BORRADOR_KEY); router.push(`/gracias/${result.id}`);
+      olvidarBorrador(); router.push(`/gracias/${result.id}`);
     } catch (e) { setEnviando(false); setError(e instanceof Error ? e.message : "No pudimos registrar tu compra."); }
   }
 
