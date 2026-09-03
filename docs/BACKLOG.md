@@ -21,6 +21,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-014 | Como operador, quiero que todas las fechas y horas usen la zona de Perú para operar correctamente sin importar la configuración del servidor, la base o el dispositivo. | P0 | Hecho | UTC/`timestamptz`; formatos `America/Lima`; unitarias multi-TZ y 21 E2E aprobados |
 | US-015 | Como guardia, quiero ver el nombre y la hora de ingreso en los resultados PASA y NO PASA para validar cada acceso con claridad. | P1 | En progreso | Implementación, migración y 5 E2E locales aprobados; falta aplicar 0014 y validar en producción |
 | US-016 | Como asistente, quiero ver el QR dentro de mi entrada pública para poder presentarlo desde el enlace. | P1 | Hecho | QR canónico visible; URL real verificada localmente sin consumir la entrada; typecheck, lint y build aprobados |
+| US-017 | Como asistente, quiero ver la fecha y hora del evento con un formato uniforme para identificar claramente cuándo asistir. | P1 | Hecho | `06 de setiembre 2026` en `es-PE` y hora de Lima; unitarias multi-TZ, typecheck, lint y build aprobados |
 
 ## Convenciones de estado
 

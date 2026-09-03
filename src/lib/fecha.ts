@@ -7,11 +7,14 @@ function fechaValida(fecha: string | Date) {
 }
 
 export function formatearFecha(fecha: string | Date) {
-  return new Intl.DateTimeFormat("es-PE", {
-    dateStyle: "short",
-    timeStyle: "short",
+  const partes = new Intl.DateTimeFormat("es-PE", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
     timeZone: ZONA_HORARIA_PERU,
-  }).format(fechaValida(fecha));
+  }).formatToParts(fechaValida(fecha));
+  const obtener = (tipo: Intl.DateTimeFormatPartTypes) => partes.find((parte) => parte.type === tipo)?.value ?? "";
+  return `${obtener("day")} de ${obtener("month")} ${obtener("year")}`;
 }
 
 export function formatearHora(fecha: string | Date) {
@@ -20,6 +23,10 @@ export function formatearHora(fecha: string | Date) {
     minute: "2-digit",
     timeZone: ZONA_HORARIA_PERU,
   }).format(fechaValida(fecha));
+}
+
+export function formatearFechaHora(fecha: string | Date) {
+  return `${formatearFecha(fecha)}, ${formatearHora(fecha)}`;
 }
 
 export function formatearFechaCsv(fecha: string | Date) {
