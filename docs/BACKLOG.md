@@ -25,6 +25,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-018 | Como admin, quiero activar explícitamente la edición de entradas y entender cuándo usarla para evitar ajustes accidentales. | P1 | Hecho | Edición en dos etapas, explicación, guardar y cancelar; 6 E2E admin, typecheck, lint y build aprobados |
 | US-019 | Como comprador rechazado, quiero recibir un correo con el motivo y el siguiente paso para corregir mi compra sin tener que preguntar. | P0 | En progreso | SDD; correo automático con marco fijo y orientación para adjuntar un comprobante claro; falta aceptación real en producción |
 | US-020 | Como comprador, quiero registrar mi comprobante sin ingresar el código de operación para completar la compra con menos fricción. | P0 | Hecho | Migración 0016; códigos históricos visibles/buscables; 22 E2E, RLS, typecheck, lint y build aprobados |
+| US-021 | Como asistente, quiero que el soporte del evento use `arakado@illapasystems.com` para contactar una dirección real y atendida. | P0 | Pendiente | SDD; requiere actualizar `EMAIL_REPLY_TO`, admin y referencias operativas a `illapa.pe`, con validación real de respuesta |
 | US-021 | Como asistente, quiero recibir mi entrada con el arte oficial del evento para reconocerla y compartirla, sin perder la lectura del QR en puerta. | P2 | En progreso | Implementada en correo y `/v/[token]`; 19,4 KB por entrada y 55,4 kB el correo con dos; QR leído con `jsqr`; typecheck, lint y build aprobados; falta prueba en celulares reales |
 
 ## Convenciones de estado
