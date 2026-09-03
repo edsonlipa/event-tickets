@@ -144,6 +144,7 @@ test("rechaza con motivo y conserva la auditoría", async ({ page }) => {
 });
 
 test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await login(page);
   await page.evaluate(async (id) => { await fetch(`/api/admin/registros/${id}/confirmar`, { method: "POST" }); }, casos.ajuste.id);
   const resultados = await page.evaluate(async (id) => Promise.all([
@@ -163,7 +164,14 @@ test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }
   await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
   await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).not.toBeVisible();
   await page.getByRole("button", { name: "Modificar número de entradas" }).click();
-  await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).toBeVisible();
+  const modal = page.getByRole("dialog", { name: "Modificar número de entradas" });
+  await expect(modal).toBeVisible();
+  const cajaModal = await modal.boundingBox();
+  expect(cajaModal).not.toBeNull();
+  expect(cajaModal!.x).toBeGreaterThanOrEqual(0);
+  expect(cajaModal!.y).toBeGreaterThanOrEqual(0);
+  expect(cajaModal!.x + cajaModal!.width).toBeLessThanOrEqual(390);
+  expect(cajaModal!.y + cajaModal!.height).toBeLessThanOrEqual(844);
   await expect(page.getByText("Usa esta opción solo para corregir una compra ya confirmada.", { exact: false })).toBeVisible();
   await page.getByLabel("Nueva cantidad de entradas").fill("3");
   await page.getByRole("button", { name: "Cancelar" }).click();

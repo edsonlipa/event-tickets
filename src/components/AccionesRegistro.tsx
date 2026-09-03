@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Propiedades = {
   id: string;
@@ -58,9 +59,9 @@ export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: P
           Modificar número de entradas
         </button>
 
-        {editandoCantidad && (
-          <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-ink/70 p-4" role="presentation" onKeyDown={(event) => { if (event.key === "Escape" && !enviando) setEditandoCantidad(false); }}>
-            <section role="dialog" aria-modal="true" aria-labelledby="titulo-modificar-entradas" className="relative w-full max-w-md bg-white p-5 text-ink shadow-brutal">
+        {editandoCantidad && createPortal(
+          <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto overscroll-contain bg-ink/75 p-4 [padding-bottom:max(1rem,env(safe-area-inset-bottom))] [padding-top:max(1rem,env(safe-area-inset-top))]" role="presentation" onKeyDown={(event) => { if (event.key === "Escape" && !enviando) setEditandoCantidad(false); }}>
+            <section role="dialog" aria-modal="true" aria-labelledby="titulo-modificar-entradas" className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto bg-white p-5 text-left text-ink shadow-brutal">
               <button type="button" aria-label="Cerrar" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(false); }} className="absolute right-3 top-3 grid h-10 w-10 place-items-center border-2 border-ink bg-white text-xl font-black">×</button>
               <p className="event-kicker">Compra confirmada</p>
               <h2 id="titulo-modificar-entradas" className="event-title mt-2 pr-10 text-2xl">Modificar número de entradas</h2>
@@ -83,7 +84,8 @@ export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: P
                 </div>
               </form>
             </section>
-          </div>
+          </div>,
+          document.body,
         )}
 
         <button disabled={enviando} onClick={() => void ejecutar(`/api/admin/registros/${id}/reenviar`)} className="event-button w-full bg-event-blue">Reenviar correo</button>
