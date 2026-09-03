@@ -76,6 +76,23 @@ body {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
+/* El botón de copiar es un icono con `font-size: 0`, así que el cambio de
+   texto no se ve. Al copiar, el icono pasa a un check y el botón se tiñe. */
+.event-kicker + h2 + .mb-5.grid strong + button[data-copia="ok"] {
+  border-color: #15803d;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.event-kicker + h2 + .mb-5.grid strong + button[data-copia="ok"]::before {
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.event-kicker + h2 + .mb-5.grid strong + button[data-copia="error"] {
+  border-color: var(--event-red);
+  color: var(--event-red);
+}
+
 @media (max-width: 360px) {
   .event-kicker + h2 + .mb-5.grid {
     grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
