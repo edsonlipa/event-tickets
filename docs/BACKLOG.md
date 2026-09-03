@@ -27,7 +27,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-020 | Como comprador, quiero registrar mi comprobante sin ingresar el código de operación para completar la compra con menos fricción. | P0 | Hecho | Migración 0016; códigos históricos visibles/buscables; 22 E2E, RLS, typecheck, lint y build aprobados |
 | US-021 | Como asistente, quiero que el soporte del evento use `arakado@illapasystems.com` para contactar una dirección real y atendida. | P0 | Pendiente | SDD; requiere actualizar `EMAIL_REPLY_TO`, admin y referencias operativas a `illapa.pe`, con validación real de respuesta |
 | US-021 | Como asistente, quiero recibir mi entrada con el arte oficial del evento para reconocerla y compartirla, sin perder la lectura del QR en puerta. | P2 | En progreso | Implementada en correo y `/v/[token]`; 19,4 KB por entrada y 55,4 kB el correo con dos; QR leído con `jsqr`; typecheck, lint y build aprobados; falta prueba en celulares reales |
-| US-023 | Como guardia, quiero que el escáner responda siempre al leer un QR aunque el navegador bloquee el almacenamiento, para no quedarme sin saber si la persona pasa. | P0 | Pendiente | SDD; mismo defecto que se corrigió en el formulario de compra, aquí en la ruta de cola offline de `Escaner.tsx` |
+| US-023 | Como guardia, quiero que el escáner responda siempre al leer un QR aunque el navegador bloquee el almacenamiento, para no quedarme sin saber si la persona pasa. | P0 | En progreso | Las cuatro escrituras pasan por `guardarLocal`; `mostrar()` ya no depende de que persistan y un aviso rojo pide anotar a mano; typecheck, lint y build aprobados; falta prueba en los dos celulares |
 
 ## Convenciones de estado
 
