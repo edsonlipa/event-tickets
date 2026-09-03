@@ -54,35 +54,40 @@ export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: P
         <p className="border-l-8 border-emerald-600 bg-emerald-50 p-4 text-sm font-bold text-emerald-800">Pago confirmado.</p>
         {emailError && <p className="border-l-8 border-event-red bg-red-50 p-4 text-sm text-red-800">Error de correo: {emailError}</p>}
 
-        <section className="space-y-3 border-2 border-ink p-4">
-          <div>
-            <span className="event-label">Cantidad actual</span>
-            <strong className="text-2xl">{cantidadPersonas}</strong>
-          </div>
-          <p className="text-sm text-neutral-600">
-            Usa esta opción solo para corregir una compra ya confirmada. Al aumentar se generan QR nuevos; al reducir se anulan únicamente QR que todavía no fueron usados. Después de guardar, reenvía el correo al comprador.
-          </p>
+        <button type="button" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(true); }} className="event-button-outline w-full">
+          Modificar número de entradas
+        </button>
 
-          {!editandoCantidad ? (
-            <button type="button" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(true); }} className="event-button-outline w-full">
-              Modificar número de entradas
-            </button>
-          ) : (
-            <form onSubmit={(event) => void ajustar(event)} className="space-y-3 border-t-2 border-dashed border-ink/20 pt-4">
-              <label className="block">
-                <span className="event-label">Nueva cantidad de entradas</span>
-                <input name="cantidadPersonas" type="number" min={1} max={20} required defaultValue={cantidadPersonas} className="event-input" />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(false); }} className="event-button-outline w-full">Cancelar</button>
-                <button disabled={enviando} className="event-button-dark w-full">Guardar cambios</button>
+        {editandoCantidad && (
+          <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-ink/70 p-4" role="presentation" onKeyDown={(event) => { if (event.key === "Escape" && !enviando) setEditandoCantidad(false); }}>
+            <section role="dialog" aria-modal="true" aria-labelledby="titulo-modificar-entradas" className="relative w-full max-w-md bg-white p-5 text-ink shadow-brutal">
+              <button type="button" aria-label="Cerrar" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(false); }} className="absolute right-3 top-3 grid h-10 w-10 place-items-center border-2 border-ink bg-white text-xl font-black">×</button>
+              <p className="event-kicker">Compra confirmada</p>
+              <h2 id="titulo-modificar-entradas" className="event-title mt-2 pr-10 text-2xl">Modificar número de entradas</h2>
+              <div className="mt-4 bg-cream p-4">
+                <span className="event-label">Cantidad actual</span>
+                <strong className="text-2xl">{cantidadPersonas}</strong>
               </div>
-            </form>
-          )}
-        </section>
+              <p className="mt-4 text-sm text-neutral-600">
+                Usa esta opción solo para corregir una compra ya confirmada. Al aumentar se generan QR nuevos; al reducir se anulan únicamente QR que todavía no fueron usados. Después de guardar, reenvía el correo al comprador.
+              </p>
+              <form onSubmit={(event) => void ajustar(event)} className="mt-5 space-y-4 border-t-2 border-dashed border-ink/20 pt-5">
+                <label className="block">
+                  <span className="event-label">Nueva cantidad de entradas</span>
+                  <input autoFocus name="cantidadPersonas" type="number" min={1} max={20} required defaultValue={cantidadPersonas} className="event-input" />
+                </label>
+                {mensaje && <p className="border-l-4 border-event-red bg-red-50 p-3 text-sm text-red-700">{mensaje}</p>}
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(false); }} className="event-button-outline w-full">Cancelar</button>
+                  <button disabled={enviando} className="event-button-dark w-full">Guardar cambios</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
 
         <button disabled={enviando} onClick={() => void ejecutar(`/api/admin/registros/${id}/reenviar`)} className="event-button w-full bg-event-blue">Reenviar correo</button>
-        {mensaje && <p className="border-l-4 border-event-red bg-red-50 p-3 text-sm text-red-700">{mensaje}</p>}
+        {mensaje && !editandoCantidad && <p className="border-l-4 border-event-red bg-red-50 p-3 text-sm text-red-700">{mensaje}</p>}
       </div>
     );
   }

@@ -7,10 +7,11 @@ cuándo corresponde modificar su cantidad de entradas.
 
 ## Interacción
 
-- La vista inicial muestra la cantidad actual, una explicación operativa y el
-  botón `Modificar número de entradas`.
-- El campo numérico no aparece hasta que el administrador activa ese botón.
-- El modo de edición ofrece `Guardar cambios` y `Cancelar`.
+- La vista inicial muestra únicamente el botón `Modificar número de entradas`.
+- Al activarlo se abre un modal accesible con la cantidad actual, explicación y
+  campo numérico.
+- El modal ofrece `Guardar cambios`, `Cancelar`, cierre explícito y cierre con
+  Escape.
 - Guardar conserva el endpoint y la operación atómica existentes. Tras una
   respuesta exitosa, se cierra el editor y se refrescan los datos del servidor.
 - Cancelar descarta la selección local sin enviar una solicitud.

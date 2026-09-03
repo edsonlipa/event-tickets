@@ -161,9 +161,13 @@ test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }
 
   await page.goto(`/admin/registros/${casos.ajuste.id}`);
   await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).not.toBeVisible();
   await page.getByRole("button", { name: "Modificar número de entradas" }).click();
+  await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).toBeVisible();
+  await expect(page.getByText("Usa esta opción solo para corregir una compra ya confirmada.", { exact: false })).toBeVisible();
   await page.getByLabel("Nueva cantidad de entradas").fill("3");
   await page.getByRole("button", { name: "Cancelar" }).click();
+  await expect(page.getByRole("dialog", { name: "Modificar número de entradas" })).not.toBeVisible();
   await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
   expect((await client.from("registros").select("cantidad_personas").eq("id", casos.ajuste.id).single()).data?.cantidad_personas).toBe(4);
 
