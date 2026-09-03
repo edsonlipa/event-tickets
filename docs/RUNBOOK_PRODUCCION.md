@@ -158,6 +158,11 @@ decisión explícita del organizador y con búsqueda/entrega manual preparada.
 
 Usar una operación Yape real controlada. No usar destinatarios `example.test`.
 
+- [ ] Confirmar que el evento muestra 6 de septiembre de 2026, 9:00 a. m., aun
+      si el dispositivo está configurado temporalmente en otra zona horaria.
+- [ ] Descargar el CSV y verificar `created_at` en ISO y `created_at_peru` con la
+      fecha y hora operativa de Perú.
+
 - [x] Completar datos y cantidad en el paso 1 desde un celular.
 - [x] Confirmar resumen, total, QR, número y titular Yape.
 - [x] Adjuntar comprobante y código real de ocho dígitos.

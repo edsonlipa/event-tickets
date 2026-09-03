@@ -16,7 +16,7 @@ if (supabaseE2eUrl !== "http://127.0.0.1:55421") {
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  use: { baseURL: "http://127.0.0.1:3001" },
+  use: { baseURL: "http://127.0.0.1:3001", timezoneId: "Pacific/Auckland" },
   reporter: "list",
   webServer: {
     command: "npm run dev -- --port 3001",
@@ -24,6 +24,7 @@ export default defineConfig({
     reuseExistingServer: false,
     env: {
       ...process.env,
+      TZ: "Asia/Tokyo",
       EMAIL_SENDING_PROVIDER: "nodemailer",
       EMAIL_FROM: "Entradas E2E <no-reply@example.test>",
       EMAIL_REPLY_TO: "soporte@example.test",
@@ -32,9 +33,9 @@ export default defineConfig({
       SMTP_SECURE: "false",
       SMTP_USER: "",
       SMTP_PASS: "",
-      CRON_SECRET: process.env.CRON_SECRET || "cron-e2e",
-      GUARDIA_PIN: process.env.GUARDIA_PIN || "123456",
-      SESSION_SECRET: process.env.SESSION_SECRET || "session-secret-e2e-con-mas-de-32-bytes",
+      CRON_SECRET: "cron-e2e",
+      GUARDIA_PIN: "123456",
+      SESSION_SECRET: "session-secret-e2e-con-mas-de-32-bytes",
     },
   },
 });

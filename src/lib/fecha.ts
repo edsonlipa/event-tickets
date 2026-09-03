@@ -1,13 +1,38 @@
+export const ZONA_HORARIA_PERU = "America/Lima";
+
+function fechaValida(fecha: string | Date) {
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) throw new RangeError("Fecha inválida.");
+  return valor;
+}
+
 export function formatearFecha(fecha: string | Date) {
   return new Intl.DateTimeFormat("es-PE", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "America/Lima",
-  }).format(new Date(fecha));
+    timeZone: ZONA_HORARIA_PERU,
+  }).format(fechaValida(fecha));
 }
 
-export function inicioDiaLimaUtc(fecha = new Date()) {
-  const partes = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(fecha);
-  const valor = (tipo: Intl.DateTimeFormatPartTypes) => Number(partes.find((parte) => parte.type === tipo)?.value);
-  return new Date(Date.UTC(valor("year"), valor("month") - 1, valor("day"), 5)).toISOString();
+export function formatearHora(fecha: string | Date) {
+  return new Intl.DateTimeFormat("es-PE", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: ZONA_HORARIA_PERU,
+  }).format(fechaValida(fecha));
+}
+
+export function formatearFechaCsv(fecha: string | Date) {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+    timeZone: ZONA_HORARIA_PERU,
+  }).formatToParts(fechaValida(fecha));
+  const obtener = (tipo: Intl.DateTimeFormatPartTypes) => partes.find((parte) => parte.type === tipo)?.value ?? "";
+  return `${obtener("year")}-${obtener("month")}-${obtener("day")} ${obtener("hour")}:${obtener("minute")}:${obtener("second")}`;
 }

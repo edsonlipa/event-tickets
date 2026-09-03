@@ -72,7 +72,7 @@ test.beforeAll(async () => {
     const { error: comprobanteError } = await client.from("comprobantes").insert({
       registro_id: registro.id,
       storage_path: path,
-      codigo_operacion: `OP-E2E-${index}-${registro.id.slice(0, 6)}`,
+      codigo_operacion: String(10_000_000 + index),
       monto: registro.cantidad * 15,
     });
     if (comprobanteError) throw comprobanteError;
@@ -112,7 +112,7 @@ test("muestra 12 comprobantes, busca por operación y confirma un lote", async (
   const { count } = await client.from("entradas").select("id", { count: "exact", head: true }).in("registro_id", [casos.loteA.id, casos.loteB.id]);
   expect(count).toBe(5);
 
-  await page.getByPlaceholder("Nombre, celular, email u operación").fill(`OP-E2E-0-${casos.loteA.id.slice(0, 6)}`);
+  await page.getByPlaceholder("Nombre, celular, email u operación").fill("10000000");
   await page.getByRole("button", { name: "Buscar" }).click();
   await expect(page.locator("article")).toHaveCount(1);
   await expect(page.getByText(casos.loteA.nombre, { exact: true })).toBeVisible();
@@ -181,5 +181,6 @@ test("exporta CSV protegido y neutraliza fórmulas", async ({ page }) => {
   expect(exportacion.type).toContain("text/csv");
   expect(exportacion.disposition).toContain("registros-evento.csv");
   expect(exportacion.body).toContain("entradas_anuladas");
+  expect(exportacion.body).toContain("created_at_peru");
   expect(exportacion.body).toContain("\"'=2+2\"");
 });

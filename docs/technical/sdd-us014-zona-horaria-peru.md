@@ -2,7 +2,7 @@
 
 ## Estado
 
-Pendiente de implementación y verificación.
+Implementada y verificada el 2 de septiembre de 2026.
 
 ## Historia
 
@@ -30,7 +30,7 @@ otra zona.
   correo, consumo de entrada, anulación y rate limit.
 - Definir los límites de "hoy" y cualquier ventana operativa con semántica de
   Perú, no con la fecha local del servidor.
-- Mostrar la hora de ingreso de una entrada en hora peruana cuando corresponda.
+- Proveer el formato de hora peruana que US-015 usará para el feedback de puerta.
 - Documentar en el runbook cómo verificar la zona horaria antes de producción.
 
 ## Fuera de alcance
@@ -64,10 +64,11 @@ si fueran necesarias, no relajarán policies ni convertirán columnas
    así al ejecutar el servidor bajo `TZ=UTC` y bajo una zona con otro offset.
 2. Un mismo timestamp de ingreso se muestra con la misma fecha y hora de Perú en
    compra, admin, puerta, entrada pública, correo y exportación donde aplique.
-3. Cerca de la medianoche peruana, los contadores y filtros definidos como
-   "hoy" incluyen exclusivamente el intervalo civil de `America/Lima`.
-4. La hora de un ingreso ya utilizado proviene del timestamp del servidor y se
-   presenta en `America/Lima`, independientemente de la zona del celular.
+3. Los valores cercanos a medianoche se asignan al día civil correcto de
+   `America/Lima`; actualmente no existen contadores ni filtros de negocio por
+   "hoy" después de US-013.
+4. El formato de hora para US-015 recibe un timestamp del servidor y lo presenta
+   en `America/Lima`, independientemente de la zona del celular.
 5. Una auditoría automatizada no encuentra formateos humanos de fecha que dependan
    implícitamente de la zona del proceso o navegador.
 6. Las pruebas automatizadas cubren al menos `TZ=UTC` y una zona distinta de
@@ -83,3 +84,20 @@ si fueran necesarias, no relajarán policies ni convertirán columnas
 - Inspección de correo y CSV con valores fijos.
 - Relectura desde Supabase para comprobar que el instante persistido no fue
   transformado ni truncado.
+
+## Evidencia
+
+- Las migraciones conservan todas las fechas operativas en `timestamptz`; el
+  evento oficial se inserta como `2026-09-06 09:00:00-05` y Postgres lo normaliza
+  al instante UTC equivalente.
+- `src/lib/fecha.ts` define una única constante `America/Lima`, formato humano,
+  formato de hora y formato estable para CSV. Se eliminó el cálculo no utilizado
+  que estaba acoplado manualmente a cinco horas de offset.
+- El CSV conserva `created_at` como ISO para interoperabilidad y agrega
+  `created_at_peru` para operación humana.
+- Las pruebas unitarias aprobaron con `TZ=UTC`, `Asia/Tokyo` y
+  `Pacific/Auckland`, incluido `2026-09-03T04:59:59Z`, que corresponde al 2 de
+  septiembre a las 23:59:59 en Perú.
+- Los 21 E2E aprobaron ejecutando el servidor con `TZ=Asia/Tokyo` y el navegador
+  emulado en `Pacific/Auckland`.
+- No fue necesaria una migración de datos o esquema.
