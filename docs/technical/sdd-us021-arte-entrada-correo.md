@@ -45,25 +45,51 @@ variable y prisa. Dos condiciones no negociables:
 Una entrada bonita que no escanea es peor que un QR feo. La aceptación exige
 probar con los dos celulares reales del runbook, no solo mirar la imagen.
 
-## Decisiones abiertas
+## Decisiones
 
-1. **Destino de la imagen.** El formato es de historia (9:16), no de cuerpo de
-   correo. Opciones: reemplazar el QR en el correo, adjuntarla aparte como pieza
-   compartible, o ambas.
-2. **Composición.** `qrcode` no compone imágenes. Alternativas: agregar `sharp`
-   (nativa, ya presente en el ecosistema Next.js), componer en JS puro sobre el
-   marco pre-renderizado, o generar SVG y rasterizar.
-3. **Peso.** Hoy cada QR pesa ~3 KB. Un arte de 1080 px rondará los cientos de
-   KB por entrada; una compra de 5 entradas multiplicaría el correo. Habrá que
-   fijar resolución y compresión, o enviar una sola pieza y no una por entrada.
-4. **Assets.** Los logos de auspiciadores no existen en `public/`; hay que
-   extraerlos del PDF o pedirlos en origen. El arte debe quedar versionado como
-   asset del proyecto, no incrustado en código.
-5. **Alcance en `/v/[token]`.** Decidir si la entrada pública adopta el mismo
-   arte o conserva el QR liso.
-6. **Nombre en la entrada.** El arte no reserva un espacio para el nombre de la
-   persona, que hoy encabeza cada tarjeta del correo. Definir si se dibuja sobre
-   el arte o se mantiene fuera, en el HTML.
+1. **Destino.** El arte reemplaza al QR liso en el correo: una imagen por
+   entrada.
+2. **Composición.** `sharp` 0.35.4, ya presente como dependencia de Next 16 y
+   soportada por Vercel, incrusta el QR sobre un marco PNG pre-renderizado.
+3. **Formato.** PNG con paleta a 621×1080. Medido: 19,1 KB por entrada frente a
+   28,9 KB en WebP y 75,9 KB en JPEG. Una compra de cinco entradas pesa 0,09 MB.
+   El diseño es de colores planos, así que la paleta comprime mejor que cualquier
+   formato con pérdida y además conserva los bordes del QR nítidos.
+4. **Asset.** El PDF se exporta una vez a `public/entrada-marco.png` y se
+   versiona. Sin renderizado de PDF en tiempo de ejecución ni dependencia de
+   fuentes instaladas en el servidor. El QR se incrusta en coordenadas fijas; si
+   el arte cambia, se reexporta y se recalibran.
+5. **Alcance.** `/v/[token]` adopta el mismo arte, para que la entrada se vea
+   igual en el correo y en la web. A 390 px de ancho el arte mide 678 px de alto,
+   así que en un celular típico entra casi completo y el QR queda en la mitad
+   superior: el desplazamiento en puerta es mínimo.
+6. **Nombre de la persona.** Permanece como texto en el HTML del correo y como
+   título en la web. No se dibuja sobre la imagen, lo que evita incrustar fuentes
+   y renderizar texto en el servidor. Contrapartida asumida: si alguien comparte
+   la imagen suelta, el nombre no viaja con ella.
+
+## Medidas del marco
+
+Lienzo de 621×1080. El recuadro blanco del QR ocupa aproximadamente 431×412 px a
+partir de (94, 444). Con un QR de 450 px y margen 1, queda aire suficiente dentro
+del recuadro para la zona de silencio.
+
+## Legibilidad verificada
+
+Se compuso el arte y se decodificó con `jsqr`, el mismo decodificador que usa el
+escáner de puerta. Cuatro configuraciones leídas correctamente, devolviendo la
+URL esperada:
+
+| Margen del QR | Ancho | Resultado |
+|---|---|---|
+| 1 | 450 px | leído |
+| 2 | 450 px | leído |
+| 4 | 450 px | leído |
+| 2 | 300 px | leído |
+
+Esto acota el riesgo pero no lo cierra: decodificar un buffer no equivale a
+escanear una pantalla con brillo y ángulo reales. La aceptación sigue exigiendo
+los dos celulares del runbook.
 
 ## Aceptación
 
