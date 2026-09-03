@@ -22,6 +22,7 @@ Cada historia referencia el criterio de aceptación del PRD; no lo duplica.
 | US-015 | Como guardia, quiero ver el nombre y la hora de ingreso en los resultados PASA y NO PASA para validar cada acceso con claridad. | P1 | En progreso | Implementación, migración y 5 E2E locales aprobados; falta aplicar 0014 y validar en producción |
 | US-016 | Como asistente, quiero ver el QR dentro de mi entrada pública para poder presentarlo desde el enlace. | P1 | Hecho | QR canónico visible; URL real verificada localmente sin consumir la entrada; typecheck, lint y build aprobados |
 | US-017 | Como asistente, quiero ver la fecha y hora del evento con un formato uniforme para identificar claramente cuándo asistir. | P1 | Hecho | `06 de setiembre 2026` en `es-PE` y hora de Lima; unitarias multi-TZ, typecheck, lint y build aprobados |
+| US-018 | Como admin, quiero activar explícitamente la edición de entradas y entender cuándo usarla para evitar ajustes accidentales. | P1 | Hecho | Edición en dos etapas, explicación, guardar y cancelar; 6 E2E admin, typecheck, lint y build aprobados |
 
 ## Convenciones de estado
 

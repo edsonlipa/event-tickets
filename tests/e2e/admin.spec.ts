@@ -160,8 +160,16 @@ test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }
   await client.from("entradas").update({ usado: true, usado_at: new Date().toISOString(), usado_por: "e2e" }).eq("id", usada!);
 
   await page.goto(`/admin/registros/${casos.ajuste.id}`);
-  await page.getByLabel("Cantidad de entradas").fill("2");
-  await page.getByRole("button", { name: "Guardar cantidad" }).click();
+  await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
+  await page.getByRole("button", { name: "Modificar número de entradas" }).click();
+  await page.getByLabel("Nueva cantidad de entradas").fill("3");
+  await page.getByRole("button", { name: "Cancelar" }).click();
+  await expect(page.getByLabel("Nueva cantidad de entradas")).not.toBeVisible();
+  expect((await client.from("registros").select("cantidad_personas").eq("id", casos.ajuste.id).single()).data?.cantidad_personas).toBe(4);
+
+  await page.getByRole("button", { name: "Modificar número de entradas" }).click();
+  await page.getByLabel("Nueva cantidad de entradas").fill("2");
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect.poll(async () => (await client.from("registros").select("cantidad_personas").eq("id", casos.ajuste.id).single()).data?.cantidad_personas).toBe(2);
   const { data: entradasAjustadas } = await client.from("entradas").select("id,nombre_persona,usado,anulada,anulada_at,anulada_por").eq("registro_id", casos.ajuste.id);
   expect(entradasAjustadas).toHaveLength(4);

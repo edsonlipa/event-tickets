@@ -28,6 +28,7 @@
 | Fecha visible | US-017 hecha: la fecha humana se centraliza como `06 de setiembre 2026` en `es-PE` y `America/Lima`, con hora separada o compuesta según la vista. Compra, correos, detalle admin y entrada pública usan el formato común; unitarias multi-TZ, typecheck, lint y build aprobaron. |
 | Sistema visual | US-009 hecha: compra, confirmación, reenvío, entrada, admin y puerta comparten tokens y componentes Bauhaus; puerta conserva feedback verde/rojo de alto contraste. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
+| Edición de cantidad | US-018 hecha: una compra pagada muestra primero la explicación y el botón para modificar; el selector aparece solo en modo edición, con guardar y cancelar. Los 6 E2E administrativos, typecheck, lint y build aprobaron. |
 | Puerta y PWA | US-005 implementada: PIN firmado y limitado, escáner cross-browser, consumo atómico, búsqueda mínima, cola offline y shell PWA; E2E local aprobado. |
 | Operación | US-006 implementada localmente: ajuste pagado transaccional, anulación auditable, export CSV segura y runbook; prueba presencial pendiente. |
 | Salida a producción | Runbook de producción creado con fases de Supabase, Vercel/DNS, secretos, correo, E2E, puerta, go/no-go y rollback. Ejecución pendiente. |
