@@ -1,6 +1,6 @@
 # Estado de implementación
 
-> Actualizado: 2 de septiembre de 2026. Este documento se actualiza en el mismo
+> Actualizado: 3 de septiembre de 2026. Este documento se actualiza en el mismo
 > cambio que cierre o bloquee una historia.
 
 ## Resumen
@@ -28,6 +28,7 @@
 | Fecha visible | US-017 hecha: la fecha humana se centraliza como `06 de setiembre 2026` en `es-PE` y `America/Lima`, con hora separada o compuesta según la vista. Compra, correos, detalle admin y entrada pública usan el formato común; unitarias multi-TZ, typecheck, lint y build aprobaron. |
 | Correo de rechazo | US-019 en progreso: el rechazo envía un correo automático con marco fijo y el motivo del admin escapado dentro; indica volver a comprar y contacto. Un fallo no revierte el rechazo y el cron lo reintenta desde `email_envios`, sin columnas nuevas. |
 | Código de operación tras rechazo | Corregido: el índice único global bloqueaba para siempre un código usado en una compra rechazada, aunque el pago Yape fuera válido y el motivo fuera un comprobante ilegible. La unicidad pasó a `crear_registro`, que ya serializa con `for update` sobre `evento` y sí puede leer `registros.status`. Verificado: compra viva bloqueada, reintento tras rechazo permitido. |
+| Retiro del código de operación | US-020 pendiente con SDD aprobado: las compras nuevas dejarán de solicitar y guardar el código; imagen y monto seguirán obligatorios, los códigos históricos permanecerán visibles y buscables, y formularios antiguos serán aceptados ignorando el código. |
 | Sistema visual | US-009 hecha: compra, confirmación, reenvío, entrada, admin y puerta comparten tokens y componentes Bauhaus; puerta conserva feedback verde/rojo de alto contraste. |
 | Panel admin | US-003 hecho: Auth por rol, grilla de 12, búsqueda, signed URLs, detalle, confirmación idempotente individual/en lote, rechazo y contadores. |
 | Edición de cantidad | US-018 hecha: una compra pagada muestra solo el botón para modificar; al activarlo abre un modal mediante portal, con explicación, cantidad actual, selector, guardar y cancelar. Respeta viewport dinámico, áreas seguras y scroll móvil; los 6 E2E administrativos incluyen viewport 390 × 844 y aprobaron junto con typecheck, lint y build. |
