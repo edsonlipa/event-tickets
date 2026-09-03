@@ -64,6 +64,41 @@ export async function enviarAcuseCompra(registroId: string): Promise<ResultadoEn
   }
 }
 
+async function armarRechazo(registroId: string) {
+  const db = getDb();
+  const [{ data: registro, error: registroError }, { data: evento, error: eventoError }] = await Promise.all([
+    db.from("registros").select("id,nombre_pagador,email,motivo_rechazo,status").eq("id", registroId).maybeSingle(),
+    db.from("evento").select("nombre").maybeSingle(),
+  ]);
+  if (registroError || eventoError || !registro || !evento) throw new Error("No se encontró una compra válida para el rechazo.");
+  if (registro.status !== "rechazado") throw new Error("La compra no está rechazada.");
+  const remitente = configuracionRemitente();
+  // El motivo lo escribe el admin en texto libre: viaja escapado y dentro de un
+  // marco fijo que aporta el saludo y el siguiente paso.
+  const motivo = escapar(registro.motivo_rechazo?.trim() || "No pudimos validar el pago.");
+  const sitio = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "";
+  return {
+    to: registro.email,
+    ...remitente,
+    subject: `No pudimos validar tu pago para ${evento.nombre}`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#202020"><div style="background:#202020;color:#f3efe4;padding:28px"><p style="margin:0;color:#efc845;font-size:12px;font-weight:bold;letter-spacing:2px">COMPRA NO VALIDADA</p><h1 style="margin:10px 0 0">Revisamos tu pago</h1></div><div style="padding:28px;border:1px solid #ddd"><p>Hola ${escapar(registro.nombre_pagador)}, revisamos el comprobante que enviaste para <strong>${escapar(evento.nombre)}</strong> y no pudimos validarlo.</p><div style="border-left:6px solid #d44735;background:#f3efe4;padding:16px;margin:24px 0"><strong>Motivo:</strong><br>${motivo}</div><p><strong>Puedes registrar tu compra de nuevo</strong> con los datos corregidos. Si tu pago por Yape es válido, usa el mismo código de operación: quedó disponible otra vez.</p>${sitio ? `<p style="margin:24px 0"><a href="${escapar(sitio)}" style="display:inline-block;background:#202020;color:#f3efe4;padding:14px 22px;font-weight:bold;text-decoration:none">Registrar mi compra de nuevo</a></p>` : ""}<p style="margin-top:24px">¿Crees que fue un error? Escríbenos a <a href="mailto:${escapar(remitente.replyTo)}">${escapar(remitente.replyTo)}</a> y lo resolvemos.</p><p style="margin-top:24px;font-size:12px;color:#666">Código de registro: ${escapar(registro.id)}</p></div></div>`,
+    attachments: [],
+  } satisfies EmailMessage;
+}
+
+export async function enviarRechazo(registroId: string): Promise<ResultadoEnvio> {
+  const db = getDb();
+  try {
+    await getEmailSendingProvider().send(await armarRechazo(registroId));
+    await db.from("email_envios").insert({ registro_id: registroId, tipo: "rechazo", exito: true });
+    return { estado: "enviado" };
+  } catch (error) {
+    const message = errorSeguro(error);
+    await db.from("email_envios").insert({ registro_id: registroId, tipo: "rechazo", exito: false, error: message });
+    return { estado: "fallido", error: message };
+  }
+}
+
 async function cargarCompra(registroId: string) {
   const db = getDb();
   const [{ data: registro, error: registroError }, { data: evento, error: eventoError }] = await Promise.all([

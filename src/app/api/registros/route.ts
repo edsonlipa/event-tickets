@@ -97,7 +97,7 @@ export async function POST(request: Request) {
 
   const [{ data: evento, error: eventoError }, { data: duplicados, error: duplicadosError }] = await Promise.all([
     db.from("evento").select("precio_unitario").limit(1).single(),
-    db.from("comprobantes").select("codigo_operacion").in("codigo_operacion", codigosOperacion),
+    db.from("comprobantes").select("codigo_operacion, registros!inner(status)").in("codigo_operacion", codigosOperacion).neq("registros.status", "rechazado"),
   ]);
   if (eventoError || !evento || duplicadosError) {
     return error("No pudimos procesar tu solicitud. Inténtalo nuevamente.", 500);

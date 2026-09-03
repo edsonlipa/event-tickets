@@ -104,6 +104,7 @@ export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: P
           <span className="event-label">Motivo de rechazo</span>
           <textarea name="motivo" required minLength={3} maxLength={500} className="min-h-24 w-full border-2 border-ink bg-cream p-3 outline-none focus:border-event-red" />
         </label>
+        <p className="border-l-4 border-event-yellow bg-cream p-3 text-xs text-neutral-700">Este texto se le enviará al comprador por correo, junto con el enlace para registrar su compra de nuevo.</p>
         <button disabled={enviando} className="event-button-outline w-full border-event-red text-red-700">Rechazar</button>
       </form>
       {mensaje && <p className="border-l-4 border-event-red bg-red-50 p-3 text-sm text-red-700">{mensaje}</p>}
