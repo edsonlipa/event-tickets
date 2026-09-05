@@ -8,10 +8,9 @@ type Propiedades = {
   id: string;
   status: string;
   cantidadPersonas: number;
-  emailError?: string | null;
 };
 
-export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: Propiedades) {
+export function AccionesRegistro({ id, status, cantidadPersonas }: Propiedades) {
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [editandoCantidad, setEditandoCantidad] = useState(false);
@@ -53,7 +52,6 @@ export function AccionesRegistro({ id, status, cantidadPersonas, emailError }: P
     return (
       <div className="space-y-4 bg-white p-4 shadow-[3px_3px_0_var(--ink)]">
         <p className="border-l-8 border-emerald-600 bg-emerald-50 p-4 text-sm font-bold text-emerald-800">Pago confirmado.</p>
-        {emailError && <p className="border-l-8 border-event-red bg-red-50 p-4 text-sm text-red-800">Error de correo: {emailError}</p>}
 
         <button type="button" disabled={enviando} onClick={() => { setMensaje(""); setEditandoCantidad(true); }} className="event-button-outline w-full">
           Modificar número de entradas

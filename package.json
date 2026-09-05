@@ -14,7 +14,9 @@
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
     "supabase:reset": "supabase db reset",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "datos:fallos-correo": "docker exec -i supabase_db_entradas-evento psql -U postgres -d postgres -v ON_ERROR_STOP=1 < scripts/datos-prueba-fallos-correo.sql",
+    "datos:limpiar": "docker exec -i supabase_db_entradas-evento psql -U postgres -d postgres -c \"delete from public.registros where email like '%@prueba.test';\""
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
