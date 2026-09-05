@@ -142,7 +142,7 @@ construyen con `NEXT_PUBLIC_SITE_URL`.
 - [x] Si se usa Zoho, verificar alias remitente, contraseña de aplicación y TLS.
 - [ ] Si se usa Resend, confirmar dominio verificado y API key de producción.
 - [x] Registrar una compra controlada con un correo real autorizado.
-- [x] Confirmar correo de recepción inicial.
+- [x] Verificar que llega la confirmación de registro inicial.
 - [x] Confirmar pago desde admin y recibir el correo con todos los QR.
 - [x] Verificar asunto, remitente, Reply-To, imágenes CID y enlaces HTTPS.
 - [x] Repetir recepción en Gmail y Outlook. iCloud fue excluido por decisión del producto; Outlook llegó a no deseado y el riesgo fue aceptado.
@@ -166,7 +166,7 @@ Usar un pago Yape real controlado. No usar destinatarios `example.test`.
 - [x] Completar datos y cantidad en el paso 1 desde un celular.
 - [x] Confirmar resumen, total, QR, número y titular Yape.
 - [x] Adjuntar la imagen del comprobante y confirmar el monto automático.
-- [x] Confirmar correo de recepción y estado `pendiente` en admin.
+- [x] Verificar la confirmación de registro y el estado `pendiente` en admin.
 - [ ] Verificar comprobante mediante URL firmada.
 - [x] Confirmar pago y releer el estado desde la base.
 - [ ] Recibir las entradas y abrir cada `/v/<token>`.
