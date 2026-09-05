@@ -127,13 +127,16 @@ export async function obtenerRegistro(id: string) {
 
 export async function obtenerContadores() {
   const db = getDb();
-  const [evento, entradas, pendientes] = await Promise.all([
-    db.from("evento").select("aforo_maximo").maybeSingle(),
+  const [compras, entradas, validados, pendientes] = await Promise.all([
+    db.from("registros").select("id", { count: "exact", head: true }),
     db.from("entradas").select("id", { count: "exact", head: true }).eq("anulada", false),
-    db.from("registros").select("cantidad_personas").eq("status", "pendiente"),
+    db.from("registros").select("id", { count: "exact", head: true }).eq("status", "pagado"),
+    db.from("registros").select("id", { count: "exact", head: true }).eq("status", "pendiente"),
   ]);
   return {
-    aforoMaximo: evento.data?.aforo_maximo ?? null,
-    ocupadas: (entradas.count ?? 0) + (pendientes.data ?? []).reduce((total, item) => total + item.cantidad_personas, 0),
+    totalCompras: compras.count ?? 0,
+    totalEntradas: entradas.count ?? 0,
+    validados: validados.count ?? 0,
+    pendientes: pendientes.count ?? 0,
   };
 }
