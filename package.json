@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1); echo \"LAN: http://$IP:3000\"; NEXT_PUBLIC_SUPABASE_URL=http://$IP:55421 NEXT_PUBLIC_SITE_URL=http://$IP:3000 next dev",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
