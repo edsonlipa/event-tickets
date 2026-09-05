@@ -10,7 +10,7 @@ export type FalloCorreo = {
 };
 
 const ETIQUETA: Record<TipoCorreo, string> = {
-  acuse: "acuse de compra",
+  acuse: "confirmación de registro",
   entradas: "entradas con QR",
   rechazo: "aviso de rechazo",
 };

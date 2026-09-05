@@ -11,8 +11,8 @@ insert into public.registros
    email_registro_enviado, email_registro_error, email_registro_intento_at,
    email_enviado, email_error, email_intento_at)
 values
-  -- 1. Acuse fallido sobre una compra PENDIENTE: hoy invisible en el panel.
-  ('aaaa0001-0000-4000-8000-000000000001', 'Ana Quispe (acuse: correo inexistente)', '999111222',
+  -- 1. Confirmacion de registro fallida sobre una compra PENDIENTE: antes invisible.
+  ('aaaa0001-0000-4000-8000-000000000001', 'Ana Quispe (confirmacion: correo inexistente)', '999111222',
    'ana@prueba.test', 2, 15, 'pendiente', null,
    false, '550 5.1.1 <ana@prueba.test>: Recipient address rejected: User unknown', now() - interval '2 hours',
    false, null, null),
@@ -36,13 +36,13 @@ values
    false, 'connect ETIMEDOUT 172.66.0.1:465', now() - interval '5 minutes'),
 
   -- 5. Configuracion del proveedor: no es culpa del comprador.
-  ('aaaa0005-0000-4000-8000-000000000005', 'Sofia Ramos (acuse: proveedor mal configurado)', '999999000',
+  ('aaaa0005-0000-4000-8000-000000000005', 'Sofia Ramos (confirmacion: proveedor mal configurado)', '999999000',
    'sofia@prueba.test', 2, 15, 'pendiente', null,
    false, 'The domain illapa.pe is not verified. Please verify it in the dashboard.', now() - interval '1 hour',
    false, null, null),
 
   -- 6. DOS fallos a la vez en el mismo registro.
-  ('aaaa0006-0000-4000-8000-000000000006', 'Carmen Apaza (acuse Y entradas fallidos)', '999000111',
+  ('aaaa0006-0000-4000-8000-000000000006', 'Carmen Apaza (confirmacion Y entradas fallidos)', '999000111',
    'carmen@prueba.test', 4, 15, 'pagado', null,
    false, 'connect ECONNREFUSED smtppro.zoho.com:465', now() - interval '3 hours',
    false, '550 5.1.1 mailbox not found', now() - interval '30 minutes'),

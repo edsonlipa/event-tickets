@@ -10,11 +10,11 @@ registro y sin interpretar jerga de proveedor.
 El panel consulta hoy `email_enviado` y `email_error` (`src/lib/admin-data.ts:30`),
 que corresponden **solo** al correo de entradas con QR. Quedan fuera:
 
-- el acuse de compra (`email_registro_enviado`, `email_registro_error`);
+- la confirmación de registro (`email_registro_enviado`, `email_registro_error`);
 - el correo de rechazo, cuyo estado vive en `email_envios` con `tipo = 'rechazo'`.
 
 Además, `AccionesRegistro.tsx:52` solo muestra el error cuando el registro está
-en `pagado`. Un acuse fallido sobre una compra pendiente es hoy invisible: el
+en `pagado`. Una confirmación de registro fallida sobre una compra pendiente es hoy invisible: el
 comprador pagó, no recibió confirmación de que su compra llegó, y nadie en el
 panel puede saberlo.
 
@@ -25,7 +25,7 @@ registros uno por uno.
 
 1. **Dónde.** Distintivo en la grilla para detectarlo de un vistazo y detalle
    completo al entrar.
-2. **Alcance.** Los tres tipos: acuse, entradas y rechazo.
+2. **Alcance.** Los tres tipos: confirmación de registro, entradas y rechazo.
 3. **Mensaje.** Causa traducida a lenguaje operativo, con el texto crudo del
    proveedor disponible para diagnóstico.
 4. **Acción.** Solo mostrar. El cron ya reintenta los tres tipos
@@ -64,7 +64,7 @@ envío exitoso posterior, que es la misma condición que ya usa
 
 ## Aceptación
 
-- Un registro con acuse fallido se distingue en la grilla, esté en el estado que
+- Un registro con la confirmación de registro fallida se distingue en la grilla, esté en el estado que
   esté.
 - El detalle nombra la causa en lenguaje operativo y permite ver el texto crudo.
 - Un fallo temporal y uno permanente se leen distinto.
@@ -74,4 +74,4 @@ envío exitoso posterior, que es la misma condición que ya usa
 ## Fuera de alcance
 
 Reintento manual desde el panel. El correo de entradas ya tiene su botón de
-reenvío; acuse y rechazo se dejan al cron por decisión explícita.
+reenvío; confirmación de registro y rechazo se dejan al cron por decisión explícita.
