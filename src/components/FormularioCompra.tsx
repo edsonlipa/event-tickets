@@ -7,6 +7,7 @@ import { FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "re
 
 import { PieDePagina } from "@/components/PieDePagina";
 import { sugerirCorreo } from "@/lib/dominio-correo";
+import { copiarTexto } from "@/lib/portapapeles";
 
 const sinSuscripcion = () => () => {};
 const BORRADOR_KEY = "compra:borrador:v1";
@@ -146,26 +147,7 @@ export function FormularioCompra({ evento, correoSoporte }: { evento: Evento; co
     window.setTimeout(() => setCopia(""), estado === "ok" ? 2200 : 6000);
   }
   async function copiar() {
-    try {
-      await navigator.clipboard.writeText(evento.yapeNumero);
-      return avisarCopia("ok");
-    } catch {
-      // `navigator.clipboard` no existe fuera de HTTPS y varios navegadores
-      // embebidos de redes sociales lo bloquean; se intenta el respaldo.
-    }
-    try {
-      const campo = document.createElement("textarea");
-      campo.value = evento.yapeNumero;
-      campo.setAttribute("readonly", "");
-      campo.style.cssText = "position:fixed;top:0;opacity:0";
-      document.body.appendChild(campo);
-      campo.select();
-      const copiado = document.execCommand("copy");
-      document.body.removeChild(campo);
-      avisarCopia(copiado ? "ok" : "error");
-    } catch {
-      avisarCopia("error");
-    }
+    avisarCopia((await copiarTexto(evento.yapeNumero)) ? "ok" : "error");
   }
   async function enviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!listo) return; setEnviando(true); setError("");

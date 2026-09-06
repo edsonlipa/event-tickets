@@ -5,15 +5,11 @@ import { join } from "node:path";
 import sharp from "sharp";
 import QRCode from "qrcode";
 
-function siteUrl() {
-  const value = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (!value) throw new Error("Falta NEXT_PUBLIC_SITE_URL.");
-  return value;
-}
+import { urlEntrada } from "@/lib/entrada-url";
 
-export function urlEntrada(id: string) {
-  return `${siteUrl()}/v/${id}`;
-}
+// Se reexporta para no obligar a `mail.ts`, que ya necesita `sharp`, a importar
+// de dos módulos distintos.
+export { urlEntrada };
 
 export function generarQrEntrada(id: string) {
   return QRCode.toBuffer(urlEntrada(id), {

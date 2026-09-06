@@ -10,6 +10,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:fecha": "node --experimental-strip-types --test tests/unit/fecha.test.mjs",
+    "test:whatsapp": "node --experimental-strip-types --test tests/unit/whatsapp.test.mjs",
     "supabase": "supabase",
     "supabase:start": "supabase status || supabase start",
     "supabase:stop": "supabase stop",

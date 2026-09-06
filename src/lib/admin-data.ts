@@ -140,3 +140,33 @@ export async function obtenerContadores() {
     rechazados: rechazados.count ?? 0,
   };
 }
+
+export type EntradaAdmin = {
+  id: string;
+  nombre_persona: string | null;
+  usado: boolean;
+};
+
+/**
+ * Entradas vigentes de una compra, en el mismo orden que las envía el correo.
+ * Las anuladas quedan fuera: su enlace ya no vale y no debe salir del panel.
+ */
+export async function listarEntradasDeRegistro(registroId: string): Promise<EntradaAdmin[]> {
+  const { data, error } = await getDb()
+    .from("entradas")
+    .select("id,nombre_persona,usado")
+    .eq("registro_id", registroId)
+    .eq("anulada", false)
+    .order("created_at");
+  if (error) throw new Error("No se pudieron cargar las entradas de la compra.");
+  return (data ?? []) as EntradaAdmin[];
+}
+
+export type EventoResumen = { nombre: string; fecha: string; lugar: string | null };
+
+/** Nombre, fecha y lugar salen siempre de la fila `evento`, nunca del código. */
+export async function obtenerEvento(): Promise<EventoResumen | null> {
+  const { data, error } = await getDb().from("evento").select("nombre,fecha,lugar").maybeSingle();
+  if (error || !data) return null;
+  return data as EventoResumen;
+}

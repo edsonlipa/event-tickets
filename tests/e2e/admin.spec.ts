@@ -206,6 +206,60 @@ test("ajusta una compra pagada sin duplicar ni borrar entradas", async ({ page }
   expect(entradasAjustadas?.filter((entrada) => entrada.anulada).every((entrada) => entrada.nombre_persona === null && entrada.anulada_por === adminId && entrada.anulada_at)).toBe(true);
 });
 
+test("ofrece las entradas por WhatsApp con el enlace de cada QR", async ({ page }) => {
+  await login(page);
+  const client = db();
+  const { data: activas } = await client.from("entradas").select("id,usado").eq("registro_id", casos.ajuste.id).eq("anulada", false).order("created_at");
+  const { data: anuladas } = await client.from("entradas").select("id").eq("registro_id", casos.ajuste.id).eq("anulada", true);
+  expect(activas).toHaveLength(2);
+  expect(anuladas).toHaveLength(2);
+
+  await page.goto(`/admin/registros/${casos.ajuste.id}`);
+  await expect(page.getByText("Entradas emitidas (2)")).toBeVisible();
+  await expect(page.getByText("Ya usada")).toHaveCount(1);
+  for (const entrada of activas!) {
+    await expect(page.getByRole("link", { name: new RegExp(`/v/${entrada.id}$`) })).toBeVisible();
+  }
+  for (const entrada of anuladas!) {
+    await expect(page.getByRole("link", { name: new RegExp(`/v/${entrada.id}$`) })).toHaveCount(0);
+  }
+
+  // `99999` + índice 4 del arreglo de registros: nueve dígitos peruanos que
+  // `wa.me` debe recibir con el código de país por delante.
+  const enlace = await page.getByRole("link", { name: "Enviar por WhatsApp" }).getAttribute("href");
+  expect(enlace).toContain("https://wa.me/51999990004?text=");
+  const mensaje = decodeURIComponent(enlace!.split("?text=")[1]);
+  expect(mensaje).toContain("II OPEN CHAMPIONSHIP");
+  expect(mensaje).toContain("Estas son tus 2 entradas:");
+  for (const entrada of activas!) expect(mensaje).toContain(`/v/${entrada.id}`);
+  for (const entrada of anuladas!) expect(mensaje).not.toContain(`/v/${entrada.id}`);
+});
+
+test("los enlaces de las entradas se ven antes que los comprobantes", async ({ page }) => {
+  await login(page);
+  await page.goto(`/admin/registros/${casos.ajuste.id}`);
+
+  // El operador de una compra confirmada ya revisó el comprobante: lo que
+  // necesita es el enlace, y debajo de la imagen quedaba fuera de pantalla.
+  const bloque = page.getByText("Entradas emitidas", { exact: false });
+  const comprobante = page.locator("figure").first();
+  const cajaBloque = await bloque.boundingBox();
+  const cajaComprobante = await comprobante.boundingBox();
+  expect(cajaBloque).not.toBeNull();
+  expect(cajaComprobante).not.toBeNull();
+  expect(cajaBloque!.y).toBeLessThan(cajaComprobante!.y);
+
+  await expect(page.getByRole("button", { name: /^Copiar el enlace de / })).toHaveCount(2);
+});
+
+test("no ofrece WhatsApp en una compra sin entradas emitidas", async ({ page }) => {
+  await login(page);
+  await page.goto(`/admin/registros/${casos.rechazo.id}`);
+  await expect(page.getByText("Este registro ya está rechazado.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Enviar por WhatsApp" })).toHaveCount(0);
+  await expect(page.getByText(/Entradas emitidas \(\d+\)/)).toHaveCount(0);
+});
+
 test("exporta CSV protegido y neutraliza fórmulas", async ({ page }) => {
   await login(page);
   const exportacion = await page.evaluate(async () => {
